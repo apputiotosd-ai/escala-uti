@@ -1,0 +1,10 @@
+.DS_Store
+*.log
+
+# Dados reais nunca entram no repositorio publico.
+# Nomes de medicos, escala preenchida e contas ficam so no banco.
+scripts/seed*.sql
+scripts/*_privado.sql
+.env
+.env.*
+supabase/.temp/
