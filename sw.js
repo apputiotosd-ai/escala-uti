@@ -2,7 +2,7 @@
 // Escala, trocas e fotos NUNCA sao guardadas aqui: sao dados de pessoas
 // e precisam estar sempre atualizados.
 
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = `escala-uti-${VERSION}`;
 
 const SHELL = [
@@ -51,8 +51,10 @@ self.addEventListener("fetch", (e) => {
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
 
-    const buscar = () =>
-      fetch(req)
+    // 'reload' pula o cache do proprio navegador. Sem isso o GitHub Pages
+    // manda max-age=600 e o medico ficaria ate 10 minutos com a versao velha.
+    const buscar = (recarregar = false) =>
+      fetch(recarregar ? new Request(req, { cache: "reload" }) : req)
         .then((res) => {
           if (res && res.ok && guardavel) cache.put(req, res.clone()).catch(() => {});
           return res;
@@ -60,7 +62,7 @@ self.addEventListener("fetch", (e) => {
         .catch(() => null);
 
     if (req.mode === "navigate" || (sameOrigin && isCode(url))) {
-      const fresh = await buscar();
+      const fresh = await buscar(true);
       if (fresh) return fresh;
       const cached = await cache.match(req);
       if (cached) return cached;
