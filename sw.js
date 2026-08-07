@@ -2,7 +2,7 @@
 // Escala, trocas e fotos NUNCA sao guardadas aqui: sao dados de pessoas
 // e precisam estar sempre atualizados.
 
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE = `escala-uti-${VERSION}`;
 
 const SHELL = [
@@ -30,41 +30,51 @@ self.addEventListener("activate", (e) => {
       .then(() => self.clients.claim()));
 });
 
+// Codigo (HTML, CSS, JS) busca a rede primeiro. Assim uma correcao chega
+// na primeira vez que o medico abre o app, e nao na segunda.
+// Imagens e icones vem do cache primeiro, porque nao mudam.
+const isCode = (url) =>
+  /\.(?:html|css|js|webmanifest)$/.test(url.pathname) || url.pathname.endsWith("/");
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  // qualquer coisa do Supabase passa direto pela rede
+  // qualquer coisa do Supabase passa direto pela rede, sem guardar nada
   if (url.hostname.endsWith(".supabase.co")) return;
-  // modulos vindos de CDN: rede primeiro, cache como reserva
+
   const sameOrigin = url.origin === self.location.origin;
+  const guardavel = sameOrigin || url.hostname === "esm.sh";
 
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const cached = await cache.match(req, { ignoreSearch: false });
 
-    const network = fetch(req)
-      .then((res) => {
-        if (res && res.ok && (sameOrigin || url.hostname === "esm.sh")) {
-          cache.put(req, res.clone()).catch(() => {});
-        }
-        return res;
-      })
-      .catch(() => null);
+    const buscar = () =>
+      fetch(req)
+        .then((res) => {
+          if (res && res.ok && guardavel) cache.put(req, res.clone()).catch(() => {});
+          return res;
+        })
+        .catch(() => null);
 
-    // casca serve rapido do cache e atualiza por tras
-    if (cached) { network; return cached; }
-
-    const fresh = await network;
-    if (fresh) return fresh;
-
-    // sem rede e sem cache: devolve a pagina inicial para o app abrir
-    if (req.mode === "navigate") {
-      return (await cache.match("./index.html")) ||
-             new Response("Sem conexao.", { status: 503, headers: { "Content-Type": "text/plain" } });
+    if (req.mode === "navigate" || (sameOrigin && isCode(url))) {
+      const fresh = await buscar();
+      if (fresh) return fresh;
+      const cached = await cache.match(req);
+      if (cached) return cached;
+      if (req.mode === "navigate") {
+        return (await cache.match("./index.html")) ||
+               new Response("Sem conexao.", { status: 503,
+                 headers: { "Content-Type": "text/plain; charset=utf-8" } });
+      }
+      return new Response("", { status: 504 });
     }
-    return new Response("", { status: 504 });
+
+    // resto: cache primeiro, rede por tras
+    const cached = await cache.match(req);
+    if (cached) { buscar(); return cached; }
+    return (await buscar()) || new Response("", { status: 504 });
   })());
 });

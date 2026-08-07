@@ -20,14 +20,17 @@ export const isStandalone = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   window.navigator.standalone === true;
 
+export const isAndroid = () => /Android/.test(navigator.userAgent);
+
 export const isIOS = () => {
   const ua = navigator.userAgent;
+  // Android vem primeiro: o teste de iPad abaixo confunde aparelho Android
+  // emulado a partir de um Mac.
+  if (isAndroid()) return false;
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
   // iPad recente se apresenta como Mac, mas tem toque
-  return /iPad|iPhone|iPod/.test(ua) ||
-         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
 };
-
-export const isAndroid = () => /Android/.test(navigator.userAgent);
 
 export const canPrompt = () => deferred !== null;
 
