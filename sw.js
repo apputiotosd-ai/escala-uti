@@ -2,7 +2,7 @@
 // Escala, trocas e fotos NUNCA sao guardadas aqui: sao dados de pessoas
 // e precisam estar sempre atualizados.
 
-const VERSION = "v7";
+const VERSION = "v8";
 const CACHE = `escala-uti-${VERSION}`;
 
 const SHELL = [

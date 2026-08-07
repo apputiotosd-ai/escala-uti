@@ -129,6 +129,7 @@ a { color: inherit; }
 /* ---------------- botoes ---------------- */
 .btn {
   display: inline-flex; align-items: center; gap: 7px;
+  text-decoration: none;
   border: 1px solid var(--rule);
   background: var(--paper-2);
   color: var(--ink);
