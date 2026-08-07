@@ -1,7 +1,7 @@
 import { h, mount } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
-import { S, loadSchedule, cell } from "../store.js";
-import { avatar, personLabel, shiftBadge, emptyState } from "../lib/ui.js";
+import { S, loadSchedule, cell, isAdmin } from "../store.js";
+import { avatar, personLabel, shiftBadge } from "../lib/ui.js";
 import {
   today, addDays, dow, DOW, monthBounds, monthLabel,
   currentShift, shortName, isWeekend,
@@ -141,9 +141,15 @@ function dayList(sch, b, units, root) {
     d = addDays(d, 1);
   }
 
+  // Mes inteiro sem ninguem escalado: mostrar 372 linhas vazias nao ajuda.
   if (!any) {
-    list.append(emptyState(
-      "A escala fixa deste mes ainda nao foi preenchida. A coordenacao monta ela na area de escala."));
+    list.replaceChildren(h("div", { class: "empty" },
+      icon("empty"),
+      h("div", null, "A escala fixa ainda nao foi preenchida."),
+      isAdmin()
+        ? h("a", { class: "btn btn-primary", href: "#/admin",
+                   style: { marginTop: "14px" } }, "Preencher a escala fixa")
+        : h("div", { style: { marginTop: "6px" } }, "A coordenacao ainda esta montando.")));
   }
   return list;
 }
