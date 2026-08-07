@@ -23,6 +23,10 @@ export const ICONS = {
   key:     P('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8 2.2 2.2-1.6 1.6 1.6 1.6-2.4 2.4-1.6-1.6-2 2"/>'),
   empty:   P('<path d="M4 6h16v14H4z"/><path d="M4 10h16M8 3v3M16 3v3"/><path d="M9 15h6"/>'),
   warn:    P('<path d="M12 4.5 21 20H3z"/><path d="M12 10v4.2M12 17.2v.1"/>'),
+  // icone de compartilhar do iPhone: quadrado com seta saindo por cima
+  share:   P('<path d="M12 3.2v11"/><path d="M8.4 6.8 12 3.2l3.6 3.6"/><path d="M7 10.5H5.4v9.3h13.2v-9.3H17"/>'),
+  dots:    P('<circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/>'),
+  install: P('<path d="M12 3.5v10.5"/><path d="M8 10.2 12 14l4-3.8"/><path d="M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>'),
 };
 
 export const icon = (name, cls) =>

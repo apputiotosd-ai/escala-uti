@@ -1,5 +1,9 @@
 import { h, toast } from "../lib/dom.js";
+import { icon } from "../lib/icons.js";
 import { sb, niceError } from "../store.js";
+import {
+  isStandalone, isIOS, isAndroid, canPrompt, promptInstall, onInstallChange,
+} from "../lib/install.js";
 
 const mark = () => [
   h("img", { class: "login-logo logo-light", src: "./assets/logo.png",
@@ -48,8 +52,75 @@ export function loginView(onDone) {
       err,
       form,
       h("p", { class: "meta", style: { marginTop: "18px", lineHeight: "1.5" } },
-        "Esqueceu a senha? A coordenacao gera uma nova para voce na tela de medicos.")));
+        "Esqueceu a senha? A coordenacao gera uma nova para voce na tela de medicos."),
+      installCard()));
 }
+
+/**
+ * Como deixar a escala como aplicativo no telefone.
+ * Some sozinho depois de instalado.
+ */
+function installCard() {
+  if (isStandalone()) return null;
+
+  const box = h("div", { class: "install" });
+
+  const paint = () => {
+    const kids = [
+      h("div", { class: "install-h" },
+        icon("install"),
+        h("span", null, "Deixe a escala como aplicativo no seu telefone")),
+    ];
+
+    if (canPrompt()) {
+      // Chrome e Edge instalam com um toque
+      kids.push(
+        h("p", { class: "install-p" },
+          "Assim ela abre direto, sem passar pelo navegador."),
+        h("button", {
+          class: "btn btn-primary btn-block", style: { marginTop: "10px" },
+          onclick: async (e) => {
+            e.target.disabled = true;
+            const ok = await promptInstall();
+            e.target.disabled = false;
+            if (ok) toast("Pronto. O icone ja esta na sua tela.");
+          },
+        }, icon("install"), "Instalar agora"));
+    } else if (isIOS()) {
+      kids.push(
+        h("ol", { class: "install-steps" },
+          h("li", null, "Toque em ", stepIcon("share"),
+            " na barra de baixo do Safari"),
+          h("li", null, "Deslize a lista e escolha ",
+            h("span", { class: "strong" }, "Adicionar a Tela de Inicio")),
+          h("li", null, "Confirme em ", h("span", { class: "strong" }, "Adicionar"))),
+        h("p", { class: "install-p" },
+          "No iPhone isso so funciona pelo Safari."));
+    } else if (isAndroid()) {
+      kids.push(
+        h("ol", { class: "install-steps" },
+          h("li", null, "Toque em ", stepIcon("dots"),
+            " no canto do navegador"),
+          h("li", null, "Escolha ",
+            h("span", { class: "strong" }, "Instalar aplicativo"),
+            " ou ", h("span", { class: "strong" }, "Adicionar a tela inicial"))));
+    } else {
+      kids.push(
+        h("p", { class: "install-p" },
+          "Abra este endereco no seu celular para instalar o aplicativo. ",
+          "No computador, o navegador oferece a instalacao pelo icone na barra de endereco."));
+    }
+
+    box.replaceChildren(...kids);
+  };
+
+  paint();
+  onInstallChange(paint);      // o Chrome pode avisar depois que a tela ja apareceu
+  return box;
+}
+
+const stepIcon = (name) =>
+  h("span", { class: "install-ic" }, icon(name));
 
 export function changePasswordView(onDone) {
   const err = h("div");

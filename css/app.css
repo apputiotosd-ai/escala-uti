@@ -364,6 +364,32 @@ a { color: inherit; }
 .login h2 { margin: 0 0 4px; font-size: 21px; letter-spacing: -.02em; }
 .login p.sub { margin: 0 0 22px; color: var(--ink-3); font-size: 13.5px; }
 
+/* como instalar na tela de inicio */
+.install {
+  margin-top: 22px; padding: 13px 14px;
+  border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--paper-2);
+}
+.install-h {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 650; color: var(--ink);
+  line-height: 1.3;
+}
+.install-h svg { width: 17px; height: 17px; color: var(--brand-2); flex: none; }
+.install-p { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.5; }
+.install-steps {
+  margin: 10px 0 0; padding-left: 18px;
+  font-size: 12.5px; color: var(--ink-2); line-height: 1.75;
+}
+.install-steps li { padding-left: 2px; }
+.install-steps li::marker { color: var(--ink-3); font-family: var(--mono); font-size: 11px; }
+.install-ic {
+  display: inline-flex; vertical-align: -4px;
+  padding: 1px 3px; margin: 0 1px;
+  border: 1px solid var(--rule); border-radius: 3px; background: var(--paper-3);
+}
+.install-ic svg { width: 14px; height: 14px; color: var(--brand-2); }
+
 label.f { display: block; margin-bottom: 12px; }
 label.f span {
   display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
