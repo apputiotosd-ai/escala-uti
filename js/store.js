@@ -146,6 +146,32 @@ export function awaitingMe(list) {
       e.from_approved_at && e.to_approved_at));
 }
 
+/** Turnos sem plantonista daqui para a frente, com a contagem de interessados. */
+export async function loadVacant(days = 90) {
+  const from = new Date().toISOString().slice(0, 10);
+  const to = new Date(Date.now() + days * 864e5).toISOString().slice(0, 10);
+  const { data, error } = await sb.rpc("vacant_shifts", {
+    p_org: S.org.id, p_from: from, p_to: to,
+  });
+  if (error) throw error;
+  return (data || []).sort((a, b) =>
+    a.work_date.localeCompare(b.work_date) ||
+    ["M", "T", "SN"].indexOf(a.shift) - ["M", "T", "SN"].indexOf(b.shift));
+}
+
+/** Manifestacoes de interesse. Sem filtro, traz as abertas. */
+export async function loadInterests(status = ["open"]) {
+  const { data, error } = await sb
+    .from("shift_interests").select("*")
+    .eq("org_id", S.org.id).in("status", status)
+    .gte("work_date", new Date().toISOString().slice(0, 10))
+    .order("created_at");            // ordem de chegada
+  if (error) throw error;
+  return data || [];
+}
+
+export const interestKey = (unitId, date, shift) => `${unitId}|${date}|${shift}`;
+
 export async function loadNotifications() {
   const { data, error } = await sb
     .from("notifications").select("*")

@@ -4,9 +4,13 @@ import { S, sb, loadRefs, niceError, callAdminUsers } from "../store.js";
 import { avatar, emptyState, memberPicker, unitPicker } from "../lib/ui.js";
 import { DOW3, br } from "../lib/dates.js";
 import { rotationTab } from "./admin/rotation.js";
+import { vagosTab } from "./admin/vagos.js";
+import { exportTab } from "./admin/export.js";
 
 const TABS = [
   { id: "escala",    label: "Escala fixa", render: rotationTab },
+  { id: "vagos",     label: "Vagos",       render: vagosTab },
+  { id: "fechar",    label: "Fechamento",  render: exportTab },
   { id: "medicos",   label: "Medicos",     render: membersTab },
   { id: "diaristas", label: "Diaristas",   render: roundsTab },
   { id: "ajustes",   label: "Ajustes",     render: settingsTab },

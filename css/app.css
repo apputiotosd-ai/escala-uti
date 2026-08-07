@@ -478,3 +478,48 @@ table.escala .sat { background: var(--paper-3); }
 @media (prefers-color-scheme: dark) { .toast { background: #16394d; color: var(--ink); } }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------------- relatorio do mes ---------------- */
+.print-area { padding: 16px 12px 40px; }
+.rel-cab { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.rel-logo { width: 132px; height: auto; }
+@media (prefers-color-scheme: dark) { .rel-logo { filter: brightness(1.9); } }
+.rel-cab h2 { margin: 0 0 2px; font-size: 17px; letter-spacing: -.01em; }
+.rel-h3 {
+  margin: 26px 0 8px; font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+}
+.rel-wrap { overflow-x: auto; }
+table.rel { border-collapse: collapse; font-size: 11px; width: 100%; }
+table.rel th, table.rel td {
+  border: 1px solid var(--rule); padding: 3px 5px; text-align: center; white-space: nowrap;
+}
+table.rel thead th {
+  background: var(--bar-bg); color: var(--bar-fg);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em;
+}
+table.rel td.dia { text-align: left; width: 54px; }
+table.rel tr.fds { background: var(--paper-3); }
+table.rel td.vago { color: var(--warn); font-style: italic; }
+table.rel td.trocado { font-style: italic; }
+table.rel tr.tot td { border-top: 2px solid var(--ink-3); font-weight: 700; }
+.rel-nota { font-size: 10.5px; color: var(--ink-3); line-height: 1.6; margin-top: 12px; }
+
+@media print {
+  /* na impressao sai so o relatorio, em preto no branco */
+  :root {
+    --paper: #fff; --paper-2: #fff; --paper-3: #f0f0f0;
+    --ink: #000; --ink-2: #222; --ink-3: #555;
+    --rule: #999; --rule-2: #bbb; --bar-bg: #ddd; --bar-fg: #000;
+    --warn: #900;
+  }
+  body { padding: 0; background: #fff; }
+  .top, .nav, .tabs, .monthbar, .card, .bar, .toast, .mask { display: none !important; }
+  .print-area { padding: 0; }
+  .rel-logo { filter: none !important; }
+  table.rel { font-size: 8.5pt; page-break-inside: auto; }
+  table.rel thead { display: table-header-group; }
+  table.rel tr { page-break-inside: avoid; }
+  .rel-h3 { page-break-before: auto; }
+  @page { size: A4 landscape; margin: 10mm; }
+}

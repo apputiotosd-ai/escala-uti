@@ -2,7 +2,7 @@ import { h, modal, toast, confirmBox } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
 import { S, sb, isAdmin, niceError, myShifts } from "../store.js";
 import { avatar, shiftBadge, memberPicker } from "../lib/ui.js";
-import { br, brDow, shortName } from "../lib/dates.js";
+import { br, brDow, shortName, brDateTime, haQuanto } from "../lib/dates.js";
 import { SHIFT_INFO } from "../config.js";
 
 /** Painel de um plantao: quem esta, quem estava, e o que da para fazer. */
@@ -12,6 +12,8 @@ export function openShiftSheet({ date, unit, shift, row, onChanged }) {
     ? S.byId.get(row.base_member_id) : null;
   const mine = row?.member_id === S.me.id;
   const past = new Date(`${date}T23:59:59`) < new Date();
+
+  const fila = h("div");        // interessados, preenchido quando o turno esta vago
 
   const body = h("div", null,
     h("div", { class: "card-row", style: { gap: "10px", marginBottom: "12px" } },
@@ -33,13 +35,21 @@ export function openShiftSheet({ date, unit, shift, row, onChanged }) {
               " passou o plantao")))
       : h("div", { class: "err", style: { margin: "10px 0" } }, "Este turno esta sem plantonista."),
 
+    fila,
     past && h("p", { class: "meta" }, "Plantao ja realizado."));
+
+  if (!m && !past) carregaFila(fila, unit, date, shift, onChanged);
 
   modal({
     title: unit.name + " " + br(date),
     body,
     actions: (close) => {
       const acts = [];
+      if (!past && !row?.member_id) {
+        acts.push(h("button", {
+          class: "btn btn-primary", onclick: () => { close(); manifestar({ date, unit, shift, onChanged }); },
+        }, icon("hand"), "Tenho interesse"));
+      }
       if (!past && mine) {
         acts.push(h("button", {
           class: "btn", onclick: () => { close(); openOffer({ date, unit, shift, kind: "giveaway", onChanged }); },
@@ -61,6 +71,80 @@ export function openShiftSheet({ date, unit, shift, row, onChanged }) {
       if (!acts.length) acts.push(h("button", { class: "btn btn-block", onclick: close }, "Fechar"));
       return acts;
     },
+  });
+}
+
+/* ---------- plantao vago: fila de interessados ---------- */
+async function carregaFila(alvo, unit, date, shift, onChanged) {
+  const { data, error } = await sb
+    .from("shift_interests")
+    .select("id, member_id, note, created_at")
+    .eq("org_id", S.org.id).eq("unit_id", unit.id)
+    .eq("work_date", date).eq("shift", shift).eq("status", "open")
+    .order("created_at");                 // ordem de chegada
+  if (error || !data?.length) return;
+
+  alvo.replaceChildren(
+    h("div", { class: "bar", style: { margin: "10px 0 0" } },
+      h("span", null, "Manifestaram interesse"),
+      h("span", { class: "mono" }, String(data.length))),
+    h("div", { style: { border: "1px solid var(--rule)", borderTop: "0" } },
+      data.map((it, i) => h("div", { class: "arow", style: { padding: "8px 10px" } },
+        h("span", { class: "mono", style: { color: "var(--ink-3)", width: "16px" } }, String(i + 1)),
+        avatar(it.member_id),
+        h("div", { class: "grow" },
+          h("div", { style: { fontSize: "13.5px" } },
+            S.byId.get(it.member_id)?.full_name || "?",
+            it.member_id === S.me.id && h("span", { class: "chip", style: { marginLeft: "6px" } }, "voce")),
+          h("div", { class: "meta mono" }, brDateTime(it.created_at), "  ", haQuanto(it.created_at)),
+          it.note && h("div", { class: "meta" }, it.note)),
+        isAdmin() && h("button", {
+          class: "btn btn-sm btn-primary",
+          onclick: async (e) => {
+            if (!await confirmBox("Escalar este medico",
+              `${S.byId.get(it.member_id)?.full_name} assume ${brDow(date)}, ${unit.name}, turno ${shift}. ` +
+              "Os outros interessados sao avisados.", "Escalar")) return;
+            e.target.disabled = true;
+            const { error } = await sb.rpc("grant_interest", { p_id: it.id });
+            if (error) { e.target.disabled = false; return toast(niceError(error)); }
+            document.querySelector(".mask")?.remove();
+            toast("Escalado.");
+            onChanged?.();
+          },
+        }, "Escalar")))));
+}
+
+function manifestar({ date, unit, shift, onChanged }) {
+  const note = h("textarea", { class: "inp", rows: 2, placeholder: "Recado para a coordenacao" });
+  const err = h("div");
+  modal({
+    title: "Manifestar interesse",
+    body: h("div", null,
+      h("p", { class: "meta", style: { marginTop: 0 } },
+        `${unit.name} | ${brDow(date)} | ${SHIFT_INFO[shift].label} ${SHIFT_INFO[shift].hours}`),
+      h("p", { style: { fontSize: "13.5px" } },
+        "Este turno esta sem plantonista. Voce entra na fila e a coordenacao decide quem assume. ",
+        "A data e a hora da sua manifestacao ficam registradas."),
+      h("label", { class: "f" }, h("span", null, "Observacao"), note),
+      err),
+    actions: (close) => [
+      h("button", { class: "btn", onclick: close }, "Voltar"),
+      h("button", {
+        class: "btn btn-primary",
+        onclick: async (e) => {
+          e.target.disabled = true;
+          const { error } = await sb.rpc("express_interest", {
+            p_org: S.org.id, p_unit: unit.id, p_date: date,
+            p_shift: shift, p_note: note.value.trim() || null,
+          });
+          e.target.disabled = false;
+          if (error) { err.replaceChildren(h("div", { class: "err" }, niceError(error))); return; }
+          close();
+          toast("Interesse registrado. A coordenacao vai avaliar.");
+          onChanged?.();
+        },
+      }, "Confirmar interesse"),
+    ],
   });
 }
 

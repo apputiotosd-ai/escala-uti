@@ -33,6 +33,26 @@ export const brDow = (s) => `${DOW[dow(s)]}, ${brShort(s)}`;
 
 export const monthLabel = (y, m) => `${MONTHS[m]} de ${y}`;
 
+/** "07/08/2026 as 19:32" a partir de um instante do banco */
+export function brDateTime(iso) {
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} as ` +
+         `${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** "ha 2 horas", para dar noçao de ordem de chegada sem contar no relogio */
+export function haQuanto(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 90) return "agora ha pouco";
+  const min = Math.round(s / 60);
+  if (min < 60) return `ha ${min} min`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `ha ${hr} h`;
+  const dias = Math.round(hr / 24);
+  return dias === 1 ? "ha 1 dia" : `ha ${dias} dias`;
+}
+
 /** primeiro e ultimo dia do mes, e as bordas da grade comecando no domingo */
 export function monthBounds(y, m) {
   const first = new Date(y, m, 1);
