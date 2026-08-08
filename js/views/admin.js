@@ -1,7 +1,7 @@
 import { h, mount, toast, modal, confirmBox } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
 import { S, sb, loadRefs, niceError, callAdminUsers } from "../store.js";
-import { avatar, emptyState, memberPicker, unitPicker } from "../lib/ui.js";
+import { avatar, avatarAmpliavel, linhaWhats, emptyState, memberPicker, unitPicker } from "../lib/ui.js";
 import { DOW3, br } from "../lib/dates.js";
 import { rotationTab } from "./admin/rotation.js";
 import { vagosTab } from "./admin/vagos.js";
@@ -73,14 +73,15 @@ async function paintMembers(root) {
 
 function memberRow(m, root) {
   return h("div", { class: "arow" },
-    avatar(m.id),
+    avatarAmpliavel(m.id),
     h("div", { class: "grow", style: { minWidth: 0 } },
       h("div", { class: "nm" }, m.full_name,
         m.role === "admin" && h("span", { class: "chip", style: { marginLeft: "6px" } }, "coordenacao"),
         !m.is_active && h("span", { class: "chip no", style: { marginLeft: "6px" } }, "inativo")),
       h("div", { class: "rg" },
         m.registro ? "Registro " + m.registro : "sem registro",
-        m.email ? "  |  " + m.email : "")),
+        m.email ? "  |  " + m.email : ""),
+      linhaWhats(m.phone)),
     m.user_id
       ? h("span", { class: "chip ok" }, "tem acesso")
       : h("span", { class: "chip" }, "sem acesso"),

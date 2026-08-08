@@ -27,6 +27,78 @@ function placeholder(m, size, mine) {
   }, initials(m?.full_name));
 }
 
+/**
+ * Amplia a foto por cima da tela, sem mexer no layout de baixo.
+ * Fecha tocando em qualquer lugar ou com Esc.
+ */
+export function ampliaFoto(memberId) {
+  const m = S.byId.get(memberId);
+  const url = avatarUrl(m?.avatar_path);
+  if (!url) return;                     // sem foto nao tem o que ampliar
+
+  const fechar = () => { caixa.remove(); document.removeEventListener("keydown", tecla); };
+  const tecla = (e) => { if (e.key === "Escape") fechar(); };
+
+  const caixa = h("div", {
+    class: "fotozoom", role: "dialog", "aria-label": `Foto de ${m.full_name}`,
+    onclick: fechar,
+  },
+    h("img", { src: url, alt: m.full_name || "" }),
+    h("div", { class: "fotozoom-nome" }, m.full_name || ""));
+
+  document.addEventListener("keydown", tecla);
+  document.body.append(caixa);
+}
+
+/** Foto que amplia ao toque. Igual a normal, so ganha o gesto. */
+export function avatarAmpliavel(memberId, size = "") {
+  const m = S.byId.get(memberId);
+  const el = avatar(memberId, size);
+  if (!m?.avatar_path) return el;
+
+  el.classList.add("ava-zoom");
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
+  el.setAttribute("title", "Toque para ampliar");
+  el.addEventListener("click", (e) => { e.stopPropagation(); ampliaFoto(memberId); });
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ampliaFoto(memberId); }
+  });
+  return el;
+}
+
+/**
+ * Telefone brasileiro para link do WhatsApp.
+ * Celular com DDD tem 11 digitos, 10 se for fixo antigo. Com o pais, 12 ou 13.
+ * Devolve null quando o numero nao tem cara de telefone.
+ */
+export function whatsUrl(phone) {
+  const d = String(phone || "").replace(/\D/g, "");
+  if (d.length < 10) return null;
+  if (d.length >= 12 && d.startsWith("55")) return `https://wa.me/${d}`;
+  if (d.length === 10 || d.length === 11) return `https://wa.me/55${d}`;
+  return `https://wa.me/${d}`;
+}
+
+/** (85) 98931-2299 */
+export function telFormatado(phone) {
+  let d = String(phone || "").replace(/\D/g, "");
+  if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return String(phone || "");
+}
+
+/** Numero com o atalho para abrir a conversa no WhatsApp. */
+export function linhaWhats(phone) {
+  const url = whatsUrl(phone);
+  if (!url) return null;
+  return h("a", {
+    class: "whats", href: url, target: "_blank", rel: "noopener",
+    onclick: (e) => e.stopPropagation(),
+  }, icon("whats"), h("span", { class: "mono" }, telFormatado(phone)));
+}
+
 export const shiftBadge = (s) => h("span", { class: `shift ${s}` }, s);
 
 export const shiftHours = (s) => SHIFT_INFO[s]?.hours || "";

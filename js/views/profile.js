@@ -1,7 +1,7 @@
 import { h, mount, toast } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
 import { S, sb, loadRefs, niceError, loadNotifications, isAdmin } from "../store.js";
-import { avatar, emptyState } from "../lib/ui.js";
+import { avatarAmpliavel, emptyState } from "../lib/ui.js";
 import { br } from "../lib/dates.js";
 import { signOut } from "../app.js";
 
@@ -22,7 +22,7 @@ async function paint(root) {
 
   const avaBox = h("div", { class: "card-row", style: { gap: "14px" } });
   const renderAva = () => mount(avaBox,
-    avatar(S.me.id, "xl"),
+    avatarAmpliavel(S.me.id, "xl"),
     h("div", { class: "grow" },
       h("div", { class: "strong" }, me.full_name),
       me.registro && h("div", { class: "meta mono" }, "Registro " + me.registro),

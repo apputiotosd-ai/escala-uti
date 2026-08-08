@@ -184,6 +184,41 @@ a { color: inherit; }
 }
 .ava-ph.lg { font-size: 15px; } .ava-ph.xl { font-size: 26px; }
 
+/* foto que amplia: sem enfeite, so o gesto */
+.ava-zoom { cursor: zoom-in; }
+.ava-zoom:focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; }
+
+.fotozoom {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(6, 14, 20, .92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 24px; cursor: zoom-out;
+  animation: fz .14s ease-out;
+}
+@keyframes fz { from { opacity: 0 } to { opacity: 1 } }
+.fotozoom img {
+  max-width: min(88vw, 460px); max-height: 74vh;
+  width: auto; height: auto; border-radius: 4px;
+  background: var(--paper-3);
+  box-shadow: 0 12px 44px rgba(0, 0, 0, .5);
+}
+.fotozoom-nome {
+  color: #fff; font-size: 14px; font-weight: 600; text-align: center;
+  letter-spacing: -.01em; max-width: 88vw;
+}
+
+/* numero com atalho para o WhatsApp */
+.whats {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 3px; padding: 2px 7px 2px 5px;
+  border: 1px solid var(--rule); border-radius: 999px;
+  font-size: 11.5px; color: var(--ok); text-decoration: none;
+  background: color-mix(in srgb, var(--ok) 8%, transparent);
+}
+.whats:hover { border-color: var(--ok); }
+.whats svg { width: 14px; height: 14px; flex: none; }
+.whats .mono { font-size: 11px; letter-spacing: -.01em; }
+
 /* ---------------- quem esta agora ---------------- */
 /* Fica preso no alto junto com o cabecalho: e a informacao mais consultada,
    e some da vista assim que o medico rola a escala.

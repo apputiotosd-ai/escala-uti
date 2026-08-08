@@ -1,7 +1,7 @@
 import { h, modal, toast, confirmBox } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
 import { S, sb, isAdmin, niceError, myShifts } from "../store.js";
-import { avatar, shiftBadge, memberPicker } from "../lib/ui.js";
+import { avatar, avatarAmpliavel, linhaWhats, shiftBadge, memberPicker } from "../lib/ui.js";
 import { br, brDow, shortName, brDateTime, haQuanto } from "../lib/dates.js";
 import { SHIFT_INFO } from "../config.js";
 
@@ -26,10 +26,11 @@ export function openShiftSheet({ date, unit, shift, row, onChanged }) {
 
     m
       ? h("div", { class: "card-row", style: { gap: "10px", padding: "10px 0", borderTop: "1px solid var(--rule)" } },
-          avatar(row.member_id, "lg"),
-          h("div", { class: "grow" },
+          avatarAmpliavel(row.member_id, "lg"),
+          h("div", { class: "grow", style: { minWidth: 0 } },
             h("div", { class: "strong" }, m.full_name),
             m.registro && h("div", { class: "meta mono" }, "Registro " + m.registro),
+            linhaWhats(m.phone),
             was && h("div", { class: "meta" },
               h("span", { style: { textDecoration: "line-through" } }, was.full_name),
               " passou o plantao")))
