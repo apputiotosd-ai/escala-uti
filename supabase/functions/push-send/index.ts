@@ -104,11 +104,21 @@ async function cifra(texto: string, p256dhB64: string, authB64: string): Promise
 
 /* ---------------- texto do aviso ---------------- */
 function paraOnde(kind: string): string {
+  // aviso de mural leva ao mural: e lá que se pega ou se propõe troca
+  if (kind.startsWith("offer")) return "#/mural";
+  if (kind.startsWith("interest")) return "#/mural";
   if (kind.startsWith("swap") || kind.startsWith("giveaway") || kind.startsWith("exchange")) {
     return "#/pendencias";
   }
-  if (kind.startsWith("interest")) return "#/mural";
   return "#/escala";
+}
+
+/**
+ * Aviso de mural chega para muita gente ao mesmo tempo. Sem tag propria,
+ * um aviso substituiria o outro no aparelho e a pessoa perderia ofertas.
+ */
+function etiqueta(kind: string, id: string): string {
+  return kind.startsWith("offer") ? `offer-${id}` : kind;
 }
 
 Deno.serve(async (req) => {
@@ -146,7 +156,7 @@ Deno.serve(async (req) => {
     title: aviso.title,
     body: aviso.body ?? "",
     url: APP_URL + paraOnde(aviso.kind ?? ""),
-    tag: aviso.kind,
+    tag: etiqueta(aviso.kind ?? "", aviso.id),
   });
 
   let entregues = 0;

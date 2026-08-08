@@ -163,7 +163,35 @@ function blocoPush() {
 
       aparelhos.length > 1 && h("div", { class: "meta", style: { marginTop: "10px" } },
         `Ligado em ${aparelhos.length} aparelhos: `,
-        aparelhos.map((a) => a.aparelho || "aparelho").join(", "))));
+        aparelhos.map((a) => a.aparelho || "aparelho").join(", ")),
+
+      // sem isso, quem achar o mural barulhento desliga TODOS os avisos
+      sub && h("label", {
+        class: "card-row",
+        style: { gap: "10px", marginTop: "12px", paddingTop: "12px",
+                 borderTop: "1px solid var(--rule-2)", alignItems: "flex-start" },
+      },
+        h("input", {
+          type: "checkbox",
+          checked: (S.byId.get(S.me.id)?.avisa_mural) !== false,
+          style: { marginTop: "2px" },
+          onchange: async (e) => {
+            const { error } = await sb.rpc("definir_aviso_mural", {
+              p_org: S.org.id, p_ligado: e.target.checked,
+            });
+            if (error) { e.target.checked = !e.target.checked; return toast(niceError(error)); }
+            await loadRefs();
+            toast(e.target.checked
+              ? "Você será avisado dos plantões do mural."
+              : "Aviso de mural desligado. Trocas dirigidas a você continuam chegando.");
+          },
+        }),
+        h("div", null,
+          h("div", { style: { fontSize: "13px", fontWeight: "600" } },
+            "Avisar quando alguém publicar plantão no mural"),
+          h("div", { class: "meta" },
+            "Desligando isto, você continua recebendo aviso de troca e cessão ",
+            "dirigidas a você, e de plantão que a coordenação passar para o seu nome.")))));
   };
 
   pintar();

@@ -105,7 +105,7 @@ export async function loadRefs() {
     // 'phone' faz falta aqui: sem ele o Perfil relia o telefone como vazio
     // e o medico achava que nao tinha salvado
     sb.from("members")
-      .select("id, full_name, display_name, registro, phone, avatar_path, role, is_active, user_id, email")
+      .select("id, full_name, display_name, registro, phone, avatar_path, role, is_active, user_id, email, avisa_mural")
       .eq("org_id", S.org.id).order("full_name"),
   ]);
   if (u.error) throw u.error;
