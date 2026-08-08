@@ -185,26 +185,40 @@ a { color: inherit; }
 .ava-ph.lg { font-size: 15px; } .ava-ph.xl { font-size: 26px; }
 
 /* ---------------- quem esta agora ---------------- */
-.now { border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+/* Fica preso no alto junto com o cabecalho: e a informacao mais consultada,
+   e some da vista assim que o medico rola a escala.
+   As alturas sao medidas em JS, porque o recorte da tela do iPhone muda o
+   tamanho do cabecalho e um valor fixo aqui erraria. */
+.now {
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-2);
+  /* o -1px cobre a fresta que sobra quando a altura do cabecalho
+     cai numa fracao de pixel e o conteudo aparece por tras */
+  position: sticky; top: calc(var(--top-h, 56px) - 1px); z-index: 25;
+}
 .now-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+/* foto em cima do nome: em quatro colunas num celular, lado a lado
+   sobra menos de 60px e todo nome vira reticencia */
 .now-cell {
-  padding: 9px 8px; border-right: 1px solid var(--rule-2);
-  display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
-  min-width: 0;
+  padding: 6px 4px 7px; border-right: 1px solid var(--rule-2);
+  display: flex; flex-direction: column; gap: 3px; align-items: center;
+  min-width: 0; text-align: center;
 }
 .now-cell:last-child { border-right: 0; }
-.now-u { font-family: var(--mono); font-size: 10px; font-weight: 700;
+.now-u { font-family: var(--mono); font-size: 9.5px; font-weight: 700;
          letter-spacing: .08em; color: var(--ink-3); }
-.now-p { display: flex; align-items: center; gap: 6px; min-width: 0; width: 100%; }
-.now-n { font-size: 12px; font-weight: 550; overflow: hidden;
-         text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.now-empty { font-size: 12px; color: var(--warn); font-style: italic; }
+.now-p { display: flex; flex-direction: column; align-items: center; gap: 3px;
+         min-width: 0; width: 100%; }
+.now-p .ava { width: 24px; height: 24px; }
+.now-n { font-size: 11.5px; font-weight: 550; line-height: 1.2; overflow: hidden;
+         text-overflow: ellipsis; white-space: nowrap; min-width: 0; width: 100%; }
+.now-empty { font-size: 11px; color: var(--warn); font-style: italic; line-height: 1.25; }
 
 /* ---------------- abas de UTI ---------------- */
 .tabs {
   display: flex; gap: 0; border-bottom: 1px solid var(--rule);
   background: var(--paper); overflow-x: auto; scrollbar-width: none;
-  position: sticky; z-index: 20;
+  position: sticky; top: calc(var(--top-h, 56px) + var(--now-h, 0px) - 2px); z-index: 20;
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {

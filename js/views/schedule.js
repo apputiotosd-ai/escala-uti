@@ -27,11 +27,16 @@ async function paint(root) {
   const sch = await loadSchedule(b.gridStart, b.gridEnd);
 
   const body = h("div");
+  const faixa = nowStrip(sch);
   mount(root,
-    nowStrip(sch),
+    faixa,
     tabs(root),
     monthNav(root),
     body);
+
+  // A faixa fica na tela o tempo todo, entao nao pode envelhecer:
+  // as 07h, 13h e 19h ela troca de turno sozinha.
+  vigiaTurno(root, sch);
 
   const single = view.unit && S.unitById.get(view.unit);
   mount(body,
@@ -53,6 +58,21 @@ async function paint(root) {
 }
 
 const reload = (root) => paint(root).catch((e) => mount(root, h("div", { class: "err" }, e.message)));
+
+/** Troca a faixa "Agora" quando o turno vira, sem recarregar a escala toda. */
+let relogio;
+function vigiaTurno(root, sch) {
+  clearInterval(relogio);
+  let atual = JSON.stringify(currentShift());
+  relogio = setInterval(() => {
+    if (!root.isConnected) { clearInterval(relogio); return; }
+    const agora = JSON.stringify(currentShift());
+    if (agora === atual) return;
+    atual = agora;
+    const velha = root.querySelector(".now");
+    if (velha) velha.replaceWith(nowStrip(sch));
+  }, 30000);
+}
 
 /* ---------------- quem esta de plantao agora ---------------- */
 function nowStrip(sch) {
@@ -82,7 +102,7 @@ function tabs(root) {
       class: "tab", role: "tab", "aria-selected": String(view.unit === id),
       onclick: () => { view.unit = id; reload(root); },
     }, label);
-  return h("div", { class: "tabs", role: "tablist", style: { top: "0" } },
+  return h("div", { class: "tabs", role: "tablist" },
     mk("", "Todas"),
     S.units.map((u) => mk(u.id, u.name)));
 }

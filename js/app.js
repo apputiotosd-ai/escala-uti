@@ -2,6 +2,7 @@ import { h, mount, clear } from "./lib/dom.js";
 import { icon } from "./lib/icons.js";
 import { S, sb, boot, isAdmin, refreshUnread, loadExchanges, awaitingMe, setOrg } from "./store.js";
 import { loading, errorBox } from "./lib/ui.js";
+import { ajustaTopo } from "./lib/sticky.js";
 
 import { loginView, changePasswordView } from "./views/login.js";
 import { scheduleView } from "./views/schedule.js";
@@ -117,6 +118,7 @@ export async function render() {
     if (token !== renderToken) return;
     mount(body, errorBox(e?.message || "Nao consegui carregar esta tela."));
   }
+  ajustaTopo();
 
   refreshPendingBadge().then(() => {
     if (token !== renderToken) return;

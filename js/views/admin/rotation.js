@@ -49,7 +49,7 @@ async function paint(root) {
         ". Quem voce colocar aqui aparece no calendario em todas as repeticoes, ",
         "do passado e do futuro. Trocas ja combinadas nao sao desfeitas."))),
 
-    h("div", { class: "tabs", style: { top: "0" } },
+    h("div", { class: "tabs" },
       S.units.map((u) => h("button", {
         class: "tab", role: "tab", "aria-selected": String(currentUnit === u.id),
         onclick: () => { currentUnit = u.id; paint(root); },

@@ -22,7 +22,7 @@ export async function adminView() {
   const root = h("div");
   const body = h("div");
 
-  const nav = h("div", { class: "tabs", style: { top: "0" } },
+  const nav = h("div", { class: "tabs" },
     h("a", { class: "tab", href: "#/escala", "aria-label": "Voltar" }, icon("left")),
     TABS.map((t) => h("button", {
       class: "tab", role: "tab", "aria-selected": String(tab === t.id),
