@@ -65,15 +65,20 @@ export async function abrirBoasVindas({ forcado = false } = {}) {
   };
 
   const passoAviso = () => {
-    if (!suportaPush()) {
-      return passo(2, "Aviso no celular",
-        "Este navegador não recebe aviso. Use o Safari no iPhone ou o Chrome no Android.");
-    }
     if (jaInscrito) return passoPronto("O aviso já está ligado neste aparelho.");
+    // no Safari sem instalar o recurso nem existe: a resposta certa é
+    // "faça o passo 1 primeiro", e não "seu navegador não serve"
     if (precisaInstalar()) {
       return passo(2, "Liberar o aviso",
-        "No iPhone o aviso só funciona depois de instalar na tela de início. " +
-        "Faça o passo 1, abra o app pelo ícone e volte aqui pelo Perfil.");
+        h("span", null,
+          "Este passo aparece depois do passo 1. Assim que a escala estiver na tela ",
+          "de início, abra pelo ", h("b", null, "ícone novo"), " e ligue o aviso em ",
+          h("b", null, "Perfil"), ". No Safari ele ainda não existe."));
+    }
+    if (!suportaPush()) {
+      return passo(2, "Aviso no celular",
+        "Este navegador não recebe aviso. No iPhone use o Safari, no Android o Chrome, " +
+        "e instale a escala na tela de início.");
     }
     if (permissao() === "denied") {
       return passo(2, "Liberar o aviso",

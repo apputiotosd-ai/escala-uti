@@ -3,6 +3,7 @@
 // precisa ser pedida a partir de um toque da pessoa.
 import { sb, S } from "../store.js";
 import { VAPID_PUBLIC_KEY } from "../config.js";
+import { isIOS, isStandalone } from "./install.js";
 
 const b64ToBytes = (s) => {
   const p = (s + "=".repeat((4 - (s.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
@@ -15,22 +16,36 @@ const bytesToB64 = (buf) =>
 export const suportaPush = () =>
   "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
-/** No iPhone o push exige app instalado na tela de inicio. */
-export const precisaInstalar = () => {
-  const ua = navigator.userAgent;
-  const iOS = /iPad|iPhone|iPod/.test(ua) ||
-              (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  const instalado = window.matchMedia("(display-mode: standalone)").matches ||
-                    window.navigator.standalone === true;
-  return iOS && !instalado;
-};
+/**
+ * No iPhone o push exige o app instalado na tela de início.
+ * Isto precisa ser checado ANTES de suportaPush: no Safari sem instalar, o
+ * PushManager nem existe, e o app acabava dizendo "este navegador não recebe
+ * aviso" para quem apenas ainda não tinha instalado.
+ */
+export const precisaInstalar = () => isIOS() && !isStandalone();
 
 export const permissao = () => (suportaPush() ? Notification.permission : "unsupported");
 
+/**
+ * serviceWorker.ready fica pendurado para sempre quando nao existe service
+ * worker registrado. Isso travava a tela de Perfil e o passo a passo numa
+ * primeira visita em que o registro falhasse. Aqui a espera tem prazo.
+ */
+async function registroPronto(msLimite = 4000) {
+  if (!("serviceWorker" in navigator)) return null;
+  const existente = await navigator.serviceWorker.getRegistration().catch(() => null);
+  if (!existente) return null;
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((r) => setTimeout(() => r(existente), msLimite)),
+  ]);
+}
+
 export async function inscricaoAtual() {
   if (!suportaPush()) return null;
-  const reg = await navigator.serviceWorker.ready;
-  return reg.pushManager.getSubscription();
+  const reg = await registroPronto();
+  if (!reg?.pushManager) return null;
+  return reg.pushManager.getSubscription().catch(() => null);
 }
 
 function nomeAparelho() {
@@ -60,7 +75,10 @@ export async function ativarPush() {
     };
   }
 
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await registroPronto(8000);
+  if (!reg?.pushManager) {
+    return { ok: false, motivo: "O app ainda está carregando. Tente de novo em alguns segundos." };
+  }
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
     sub = await reg.pushManager.subscribe({

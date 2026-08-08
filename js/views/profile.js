@@ -106,17 +106,27 @@ function blocoPush() {
     const { suportaPush, precisaInstalar, permissao, inscricaoAtual,
             ativarPush, desativarPush, meusAparelhos } = await import("../lib/push.js");
 
-    if (!suportaPush()) {
-      return mount(caixa, h("div", { class: "card-b meta" },
-        "Este navegador não recebe aviso. Abra o app no Safari do iPhone ou no Chrome."));
-    }
+    // iPhone sem instalar vem PRIMEIRO: no Safari o recurso de aviso nem
+    // existe ainda, e dizer "não suporta" confundiria quem só falta instalar
     if (precisaInstalar()) {
       return mount(caixa, h("div", { class: "card-b" },
         h("div", { class: "strong", style: { fontSize: "13.5px" } },
-          "Instale o app antes de ligar o aviso"),
-        h("div", { class: "meta", style: { marginTop: "4px", lineHeight: "1.5" } },
-          "No iPhone, o aviso só funciona com o app na tela de início. ",
-          "Toque em compartilhar no Safari e escolha Adicionar a Tela de Início.")));
+          "Primeiro instale o app, depois ligue o aviso"),
+        h("div", { class: "meta", style: { marginTop: "6px", lineHeight: "1.6" } },
+          "No iPhone o aviso só existe com o app na tela de início. A ordem é:"),
+        h("ol", { class: "install-steps", style: { marginTop: "6px" } },
+          h("li", null, "Toque em ", h("span", { class: "install-ic" }, icon("share")),
+            " na barra de baixo do Safari"),
+          h("li", null, "Escolha ", h("span", { class: "strong" }, "Adicionar à Tela de Início")),
+          h("li", null, "Abra a escala pelo ", h("span", { class: "strong" }, "ícone novo"),
+            ", volte aqui e ligue o aviso")),
+        h("div", { class: "meta", style: { marginTop: "8px" } },
+          "É assim no iPhone para qualquer site, não é limitação da escala.")));
+    }
+    if (!suportaPush()) {
+      return mount(caixa, h("div", { class: "card-b meta" },
+        "Este navegador não recebe aviso. No iPhone use o Safari, no Android use o Chrome, ",
+        "e instale a escala na tela de início."));
     }
 
     const sub = await inscricaoAtual();
