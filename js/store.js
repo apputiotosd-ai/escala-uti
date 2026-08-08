@@ -90,7 +90,10 @@ export async function setOrg(orgId) {
 export async function loadRefs() {
   const [u, m] = await Promise.all([
     sb.from("units").select("*").eq("org_id", S.org.id).eq("is_active", true).order("sort_order"),
-    sb.from("members").select("id, full_name, display_name, registro, avatar_path, role, is_active, user_id, email")
+    // 'phone' faz falta aqui: sem ele o Perfil relia o telefone como vazio
+    // e o medico achava que nao tinha salvado
+    sb.from("members")
+      .select("id, full_name, display_name, registro, phone, avatar_path, role, is_active, user_id, email")
       .eq("org_id", S.org.id).order("full_name"),
   ]);
   if (u.error) throw u.error;

@@ -46,10 +46,11 @@ async function paint(root) {
         class: "btn btn-primary btn-block",
         onclick: async (e) => {
           e.target.disabled = true;
+          // manda o texto como esta: vazio significa apagar, e nao "nao mexe"
           const { error } = await sb.rpc("update_my_profile", {
             p_org: S.org.id,
-            p_display_name: display.value.trim() || null,
-            p_phone: phone.value.trim() || null,
+            p_display_name: display.value.trim(),
+            p_phone: phone.value.trim(),
             p_avatar_path: null,
           });
           e.target.disabled = false;
