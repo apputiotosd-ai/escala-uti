@@ -24,7 +24,7 @@ async function paint(root) {
     ["plantoes", "escala"].map((id) => h("button", {
       class: "tab", role: "tab", "aria-selected": String(vista.aba === id),
       onclick: () => { vista.aba = id; paint(root); },
-    }, id === "plantoes" ? "Movimentacoes" : "Escala fixa")));
+    }, id === "plantoes" ? "Movimentações" : "Escala fixa")));
 
   mount(root, abas, corpo);
   mount(corpo, h("div", { class: "load" }, "Carregando"));
@@ -35,7 +35,7 @@ async function paint(root) {
   }
 }
 
-const nome = (id) => S.byId.get(id)?.full_name || "medico removido";
+const nome = (id) => S.byId.get(id)?.full_name || "médico removido";
 const uti = (id) => S.unitById.get(id)?.name || "";
 
 /* =========================================================
@@ -59,21 +59,21 @@ async function movimentacoes(root) {
     class: "inp",
     onchange: (e) => { vista.medico = e.target.value; paint(root); },
   },
-    h("option", { value: "" }, "Todos os medicos"),
+    h("option", { value: "" }, "Todos os médicos"),
     S.members.map((m) => h("option", { value: m.id, selected: m.id === vista.medico }, m.full_name)));
 
   return h("div", null,
     h("div", { class: "card" }, h("div", { class: "card-b" },
       h("label", { class: "f", style: { marginBottom: 0 } },
-        h("span", null, "Filtrar por medico"), seletor))),
+        h("span", null, "Filtrar por médico"), seletor))),
 
     h("div", { class: "bar" },
-      h("span", null, "Movimentacoes"),
+      h("span", null, "Movimentações"),
       h("span", { class: "mono" }, String(filtradas.length))),
 
     filtradas.length
       ? h("div", { class: "adminlist" }, filtradas.map(cartaoMov))
-      : emptyState("Nenhuma movimentacao registrada.", "swap"));
+      : emptyState("Nenhuma movimentação registrada.", "swap"));
 }
 
 function envolve(l, memberId) {
@@ -102,7 +102,7 @@ function cartaoMov(l) {
       h("span", { class: `chip ${cls}` }, rot),
       h("div", { class: "grow", style: { minWidth: 0 } },
         h("div", { class: "hrow-t" },
-          "Interesse em plantao vago: ", h("span", { class: "strong" }, nome(d.member_id))),
+          "Interesse em plantão vago: ", h("span", { class: "strong" }, nome(d.member_id))),
         h("div", { class: "meta mono" },
           `${uti(d.unit_id)} | ${brDow(d.work_date)} | ${d.shift} ${SHIFT_INFO[d.shift].hours}`),
         h("div", { class: "meta" },
@@ -117,7 +117,7 @@ function cartaoMov(l) {
     h("span", { class: `chip ${cls}` }, rot),
     h("div", { class: "grow", style: { minWidth: 0 } },
       h("div", { class: "hrow-t" },
-        troca ? "Troca entre " : "Cessao de ",
+        troca ? "Troca entre " : "Cessão de ",
         h("span", { class: "strong" }, nome(d.from_member_id)),
         troca ? " e " : " para ",
         h("span", { class: "strong" }, nome(d.to_member_id))),
@@ -138,9 +138,9 @@ function cartaoMov(l) {
    LIVRO DA ESCALA FIXA
    ========================================================= */
 const ACOES = {
-  escala_slot:      ["Celula do ciclo", "grid"],
-  escala_versao:    ["Versao da escala", "board"],
-  plantao_pontual:  ["Plantao de um dia", "clock"],
+  escala_slot:      ["Célula do ciclo", "grid"],
+  escala_versao:    ["Versão da escala", "board"],
+  plantao_pontual:  ["Plantão de um dia", "clock"],
 };
 
 async function auditoria() {
@@ -149,9 +149,9 @@ async function auditoria() {
   return h("div", null,
     h("div", { class: "card" }, h("div", { class: "card-b" },
       h("div", { class: "meta", style: { lineHeight: "1.55" } },
-        "Registro de quem mexeu na escala. Serve para conferir o relatorio do mes: ",
-        "toda mudanca de celula do ciclo, criacao de versao e ajuste de um dia ",
-        "aparece aqui com autor e horario. Somente a coordenacao ve."))),
+        "Registro de quem mexeu na escala. Serve para conferir o relatório do mês: ",
+        "toda mudanca de celula do ciclo, criação de versão e ajuste de um dia ",
+        "aparece aqui com autor e horário. Somente a coordenação ve."))),
 
     h("div", { class: "bar" },
       h("span", null, "Livro de registro"),
@@ -175,7 +175,7 @@ function cartaoAudit(a) {
         " | ", h("span", { class: "mono" }, brDateTime(a.quando)),
         " | ", haQuanto(a.quando)),
       a.detalhe?.versao && h("div", { class: "meta mono" },
-        "versao: ", a.detalhe.versao,
+        "versão: ", a.detalhe.versao,
         a.detalhe.vigencia_desde ? ` (desde ${br(a.detalhe.vigencia_desde)})` : ""),
       a.detalhe?.observacao && h("div", { class: "meta" }, a.detalhe.observacao)),
     h("span", { class: "chip" }, rotulo));

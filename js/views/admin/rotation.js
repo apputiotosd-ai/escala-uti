@@ -51,7 +51,7 @@ async function paint(root) {
     // seletor de versao
     h("div", { class: "card" }, h("div", { class: "card-b" },
       h("label", { class: "f", style: { marginBottom: "8px" } },
-        h("span", null, "Versao"),
+        h("span", null, "Versão"),
         h("select", {
           class: "inp",
           onchange: (e) => { versaoAtual = e.target.value; paint(root); },
@@ -62,22 +62,22 @@ async function paint(root) {
         "Ciclo de ", h("span", { class: "strong" }, `${rot.cycle_days} dias`),
         " contado a partir de ", h("span", { class: "strong mono" }, br(rot.anchor_date)), ". ",
         vigente.id === rot.id
-          ? "Esta e a versao que vale hoje."
+          ? "Esta é a versão que vale hoje."
           : passada
-            ? "Versao encerrada. Ela e o registro do que valeu naquele periodo."
-            : "Versao futura: passa a valer na data de inicio."),
+            ? "Versão encerrada. Ela é o registro do que valeu naquele período."
+            : "Versão futura: passa a valer na data de início."),
 
       h("div", { class: "card-row", style: { gap: "8px", marginTop: "12px" } },
         h("button", { class: "btn btn-primary btn-sm", onclick: () => novaVersao(root) },
-          icon("plus"), "Nova versao"),
+          icon("plus"), "Nova versão"),
         versoes.length > 1 && futura &&
           h("button", { class: "btn btn-sm btn-danger", onclick: () => descartar(rot, root) },
             "Descartar esta")))),
 
     passada
       ? h("div", { class: "err" },
-          "Esta versao ja passou. Editar aqui muda o registro historico e o que ",
-          "o relatorio do mes mostra para aquele periodo. Prefira criar uma versao nova.")
+          "Esta versão já passou. Editar aqui muda o registro histórico e o que ",
+          "o relatório do mês mostra para aquele período. Prefira criar uma versão nova.")
       : null,
 
     h("div", { class: "tabs" },
@@ -160,11 +160,11 @@ function novaVersao(root) {
   const err = h("div");
 
   modal({
-    title: "Nova versao da escala fixa",
+    title: "Nova versão da escala fixa",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: 0, lineHeight: "1.55" } },
-        "A versao de hoje e copiada inteira e passa a valer so ate o dia anterior a data ",
-        "escolhida. Nada do que ja passou muda, e o relatorio dos meses anteriores ",
+        "A versão de hoje e copiada inteira e passa a valer só até o dia anterior a data ",
+        "escolhida. Nada do que já passou muda, e o relatório dos meses anteriores ",
         "continua mostrando quem realmente estava escalado."),
       h("label", { class: "f" }, h("span", null, "Vale a partir de"), data),
       h("label", { class: "f" }, h("span", null, "Nome (opcional)"), nome),
@@ -175,7 +175,7 @@ function novaVersao(root) {
         class: "btn btn-primary",
         onclick: async (e) => {
           if (!data.value) {
-            err.replaceChildren(h("div", { class: "err" }, "Escolha a data de inicio.")); return;
+            err.replaceChildren(h("div", { class: "err" }, "Escolha a data de início.")); return;
           }
           e.target.disabled = true;
           const { data: novo, error } = await sb.rpc("nova_versao_escala", {
@@ -185,17 +185,17 @@ function novaVersao(root) {
           if (error) { err.replaceChildren(h("div", { class: "err" }, niceError(error))); return; }
           versaoAtual = novo;
           close();
-          toast("Versao criada. Agora edite o que muda nela.");
+          toast("Versão criada. Agora edite o que muda nela.");
           paint(root);
         },
-      }, "Criar versao"),
+      }, "Criar versão"),
     ],
   });
 }
 
 async function descartar(rot, root) {
-  if (!await confirmBox("Descartar versao futura",
-    `A versao "${rot.name}" e tudo que foi editado nela serao apagados, e a versao ` +
+  if (!await confirmBox("Descartar versão futura",
+    `A versão "${rot.name}" e tudo que foi editado nela serao apagados, e a versão ` +
     "anterior volta a valer sem prazo. Nada do passado muda.", "Descartar")) return;
 
   const versoes = await loadVersoes();
@@ -208,6 +208,6 @@ async function descartar(rot, root) {
     await sb.from("rotations").update({ effective_to: null }).eq("id", anterior.id);
   }
   versaoAtual = anterior?.id || null;
-  toast("Versao descartada.");
+  toast("Versão descartada.");
   paint(root);
 }

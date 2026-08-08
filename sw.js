@@ -2,7 +2,7 @@
 // Escala, trocas e fotos NUNCA sao guardadas aqui: sao dados de pessoas
 // e precisam estar sempre atualizados.
 
-const VERSION = "v16";
+const VERSION = "v17";
 const CACHE = `escala-uti-${VERSION}`;
 
 const SHELL = [
@@ -105,7 +105,7 @@ self.addEventListener("fetch", (e) => {
       if (cached) return cached;
       if (req.mode === "navigate") {
         return (await cache.match("./index.html")) ||
-               new Response("Sem conexao.", { status: 503,
+               new Response("Sem conexão.", { status: 503,
                  headers: { "Content-Type": "text/plain; charset=utf-8" } });
       }
       return new Response("", { status: 504 });

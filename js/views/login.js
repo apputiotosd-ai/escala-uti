@@ -33,7 +33,7 @@ export function loginView(onDone, aviso = null) {
       if (error) {
         err.replaceChildren(h("div", { class: "err", style: { margin: "0 0 12px" } },
           /invalid login/i.test(error.message)
-            ? "Email ou senha nao conferem."
+            ? "Email ou senha não conferem."
             : niceError(error)));
         return;
       }
@@ -49,11 +49,11 @@ export function loginView(onDone, aviso = null) {
       mark(),
       h("h2", null, "Escala UTI"),
       h("p", { class: "sub" },
-        "Entre com o email e a senha que a coordenacao passou para voce."),
+        "Entre com o email e a senha que a coordenação passou para você."),
       err,
       form,
       h("p", { class: "meta", style: { marginTop: "18px", lineHeight: "1.5" } },
-        "Esqueceu a senha? A coordenacao gera uma nova para voce na tela de medicos."),
+        "Esqueceu a senha? A coordenação gera uma nova para você na tela de médicos."),
       installCard()));
 }
 
@@ -84,7 +84,7 @@ function installCard() {
             e.target.disabled = true;
             const ok = await promptInstall();
             e.target.disabled = false;
-            if (ok) toast("Pronto. O icone ja esta na sua tela.");
+            if (ok) toast("Pronto. O ícone já está na sua tela.");
           },
         }, icon("install"), "Instalar agora"));
     } else if (isIOS()) {
@@ -93,10 +93,10 @@ function installCard() {
           h("li", null, "Toque em ", stepIcon("share"),
             " na barra de baixo do Safari"),
           h("li", null, "Deslize a lista e escolha ",
-            h("span", { class: "strong" }, "Adicionar a Tela de Inicio")),
+            h("span", { class: "strong" }, "Adicionar a Tela de Início")),
           h("li", null, "Confirme em ", h("span", { class: "strong" }, "Adicionar"))),
         h("p", { class: "install-p" },
-          "No iPhone isso so funciona pelo Safari."));
+          "No iPhone isso só funciona pelo Safari."));
     } else if (isAndroid()) {
       kids.push(
         h("ol", { class: "install-steps" },
@@ -109,7 +109,7 @@ function installCard() {
       kids.push(
         h("p", { class: "install-p" },
           "Abra este endereco no seu celular para instalar o aplicativo. ",
-          "No computador, o navegador oferece a instalacao pelo icone na barra de endereco."));
+          "No computador, o navegador oferece a instalação pelo icone na barra de endereco."));
     }
 
     box.replaceChildren(...kids);
@@ -163,7 +163,7 @@ export function changePasswordView(onDone) {
       mark(),
       h("h2", null, "Crie sua senha"),
       h("p", { class: "sub" },
-        "Voce entrou com a senha provisoria. Escolha uma senha sua, com pelo menos 8 caracteres."),
+        "Você entrou com a senha provisória. Escolha uma senha sua, com pelo menos 8 caracteres."),
       err,
       form));
 }

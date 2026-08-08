@@ -24,25 +24,25 @@ async function paint(root) {
 
   mount(root,
     h("div", { class: "bar" },
-      h("span", null, "Plantoes vagos"),
+      h("span", null, "Plantões vagos"),
       h("span", { class: "mono" }, String(vagos.length))),
     vagos.length
       ? vagos.map((v) => vacantCard(v, meus, root))
       : emptyState("Nenhum turno sem plantonista.", "check"),
 
     h("div", { class: "bar", style: { marginTop: "18px" } },
-      h("span", null, "Plantoes cedidos"),
-      h("span", { class: "mono" }, ceded.length === 1 ? "1 disponivel" : `${ceded.length} disponiveis`)),
+      h("span", null, "Plantões cedidos"),
+      h("span", { class: "mono" }, ceded.length === 1 ? "1 disponível" : `${ceded.length} disponíveis`)),
     ceded.length
       ? ceded.map((o) => offerCard(o, root))
-      : emptyState("Ninguem esta cedendo plantao no momento.", "hand"),
+      : emptyState("Ninguém está cedendo plantão no momento.", "hand"),
 
     h("div", { class: "bar", style: { marginTop: "18px" } },
       h("span", null, "Oferecidos para troca"),
       h("span", { class: "mono" }, String(swaps.length))),
     swaps.length
       ? swaps.map((o) => offerCard(o, root))
-      : emptyState("Nenhum plantao oferecido para troca.", "swap"));
+      : emptyState("Nenhum plantão oferecido para troca.", "swap"));
 }
 
 /** Turno sem ninguem: qualquer plantonista pode se candidatar. */
@@ -63,10 +63,10 @@ function vacantCard(v, meus, root) {
         Number(v.interessados) > 0
           ? h("span", { class: "chip wait" },
               Number(v.interessados) === 1 ? "1 interessado" : `${v.interessados} interessados`)
-          : h("span", { class: "meta" }, "ninguem se candidatou ainda"),
+          : h("span", { class: "meta" }, "ninguém se candidatou ainda"),
         h("span", { class: "grow" }),
         jaPedi
-          ? h("span", { class: "chip ok" }, "voce se candidatou")
+          ? h("span", { class: "chip ok" }, "você se candidatou")
           : h("button", {
               class: "btn btn-sm btn-primary",
               onclick: () => openShiftSheet({
@@ -90,8 +90,8 @@ function offerCard(o, root) {
         avatar(o.owner_id),
         h("div", { class: "grow" },
           h("div", { class: "strong", style: { fontSize: "13.5px" } },
-            mine ? "Voce" : (owner?.full_name || "Medico")),
-          h("div", { class: "meta" }, o.kind === "giveaway" ? "esta cedendo" : "quer trocar")),
+            mine ? "Você" : (owner?.full_name || "Médico")),
+          h("div", { class: "meta" }, o.kind === "giveaway" ? "está cedendo" : "quer trocar")),
         mine && h("span", { class: "chip" }, "seu")),
 
       h("div", { class: "card-row", style: { gap: "8px", padding: "8px 0",
@@ -112,7 +112,7 @@ function offerCard(o, root) {
               class: "btn btn-sm btn-danger",
               onclick: async () => {
                 if (!await confirmBox("Retirar do mural",
-                  "O plantao volta a ser seu e some da lista.", "Retirar")) return;
+                  "O plantão volta a ser seu e some da lista.", "Retirar")) return;
                 const { error } = await sb.rpc("cancel_offer", { p_offer: o.id });
                 if (error) return toast(niceError(error));
                 toast("Retirado do mural.");
@@ -123,12 +123,12 @@ function offerCard(o, root) {
             ? h("button", {
                 class: "btn btn-sm btn-primary",
                 onclick: async () => {
-                  if (!await confirmBox("Assumir plantao",
-                    `Voce quer assumir ${brDow(o.work_date)}, ${unit?.name}, turno ${o.shift}? ` +
+                  if (!await confirmBox("Assumir plantão",
+                    `Você quer assumir ${brDow(o.work_date)}, ${unit?.name}, turno ${o.shift}? ` +
                     `${owner?.full_name || "O colega"} ainda precisa confirmar.`, "Quero assumir")) return;
                   const { error } = await sb.rpc("claim_giveaway", { p_offer: o.id, p_note: null });
                   if (error) return toast(niceError(error));
-                  toast("Pedido enviado. Aguarde a confirmacao.");
+                  toast("Pedido enviado. Aguarde a confirmação.");
                   reload(root);
                 },
               }, icon("hand"), "Assumir")

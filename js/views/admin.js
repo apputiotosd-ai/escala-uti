@@ -11,9 +11,9 @@ import { historicoTab } from "./admin/historico.js";
 const TABS = [
   { id: "escala",    label: "Escala fixa", render: rotationTab },
   { id: "vagos",     label: "Vagos",       render: vagosTab },
-  { id: "historico", label: "Historico",   render: historicoTab },
+  { id: "histórico", label: "Histórico",   render: historicoTab },
   { id: "fechar",    label: "Fechamento",  render: exportTab },
-  { id: "medicos",   label: "Medicos",     render: membersTab },
+  { id: "médicos",   label: "Médicos",     render: membersTab },
   { id: "diaristas", label: "Diaristas",   render: roundsTab },
   { id: "ajustes",   label: "Ajustes",     render: settingsTab },
 ];
@@ -63,12 +63,12 @@ async function paintMembers(root) {
 
   mount(root,
     h("div", { class: "bar" },
-      h("span", null, "Corpo clinico"),
+      h("span", null, "Corpo clínico"),
       h("span", { class: "mono" }, `${withAccess} de ${S.members.length} com acesso`)),
 
     h("div", { style: { padding: "10px 12px" } },
       h("button", { class: "btn btn-block", onclick: () => editMember(null, root) },
-        icon("plus"), "Cadastrar medico")),
+        icon("plus"), "Cadastrar médico")),
 
     h("div", { class: "adminlist" }, S.members.map((m) => memberRow(m, root))));
 }
@@ -78,7 +78,7 @@ function memberRow(m, root) {
     avatarAmpliavel(m.id),
     h("div", { class: "grow", style: { minWidth: 0 } },
       h("div", { class: "nm" }, m.full_name,
-        m.role === "admin" && h("span", { class: "chip", style: { marginLeft: "6px" } }, "coordenacao"),
+        m.role === "admin" && h("span", { class: "chip", style: { marginLeft: "6px" } }, "coordenação"),
         !m.is_active && h("span", { class: "chip no", style: { marginLeft: "6px" } }, "inativo")),
       h("div", { class: "rg" },
         m.registro ? "Registro " + m.registro : "sem registro",
@@ -98,16 +98,16 @@ function editMember(m, root) {
   const disp = h("input", { class: "inp", value: m?.display_name || "", maxlength: 24 });
   const role = h("select", { class: "inp" },
     h("option", { value: "doctor", selected: m?.role !== "admin" }, "Plantonista"),
-    h("option", { value: "admin", selected: m?.role === "admin" }, "Coordenacao"));
+    h("option", { value: "admin", selected: m?.role === "admin" }, "Coordenação"));
   const active = h("input", { type: "checkbox", checked: m ? m.is_active : true });
   const err = h("div");
 
   modal({
-    title: isNew ? "Cadastrar medico" : m.full_name,
+    title: isNew ? "Cadastrar médico" : m.full_name,
     body: h("div", null,
       h("label", { class: "f" }, h("span", null, "Nome completo"), name),
       h("label", { class: "f" }, h("span", null, "Registro profissional"), reg),
-      h("label", { class: "f" }, h("span", null, "Nome curto no calendario"), disp),
+      h("label", { class: "f" }, h("span", null, "Nome curto no calendário"), disp),
       h("label", { class: "f" }, h("span", null, "Papel"), role),
       !isNew && h("label", { class: "card-row", style: { gap: "8px", marginBottom: "12px" } },
         active, h("span", { style: { fontSize: "14px" } }, "Ativo na escala")),
@@ -158,7 +158,7 @@ function grant(m, root) {
     title: "Criar acesso",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: 0 } },
-        m.full_name, " vai entrar com este email e uma senha provisoria. ",
+        m.full_name, " vai entrar com este email e uma senha provisória. ",
         "Na primeira entrada o sistema pede para ele criar a senha dele."),
       h("label", { class: "f" }, h("span", null, "Email"), email),
       err),
@@ -187,7 +187,7 @@ function grant(m, root) {
 
 async function resetPass(m) {
   if (!await confirmBox("Gerar nova senha",
-    "A senha atual para de funcionar na hora. O medico entra com a nova e escolhe outra.", "Gerar")) return;
+    "A senha atual para de funcionar na hora. O médico entra com a nova e escolhe outra.", "Gerar")) return;
   try {
     const r = await callAdminUsers({ action: "reset_password", member_id: m.id });
     showPassword(m.full_name, m.email, r.password);
@@ -196,7 +196,7 @@ async function resetPass(m) {
 
 async function revoke(m, root) {
   if (!await confirmBox("Tirar acesso",
-    "A conta de login e apagada. O nome continua na escala e o historico de plantoes fica.", "Tirar acesso")) return;
+    "A conta de login é apagada. O nome continua na escala e o histórico de plantões fica.", "Tirar acesso")) return;
   try {
     await callAdminUsers({ action: "revoke", member_id: m.id });
     toast("Acesso removido.");
@@ -205,19 +205,19 @@ async function revoke(m, root) {
 }
 
 function showPassword(name, email, password) {
-  if (!password) return toast("Conta ja existente foi vinculada.");
+  if (!password) return toast("Conta já existente foi vinculada.");
   modal({
-    title: "Senha provisoria",
+    title: "Senha provisória",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: 0 } },
         "Passe estes dados para ", h("span", { class: "strong" }, name),
-        ". Esta senha aparece uma vez so."),
+        ". Esta senha aparece uma vez só."),
       h("div", { class: "meta", style: { marginBottom: "4px" } }, email),
       h("div", { class: "pw" }, password),
       h("button", {
         class: "btn btn-block", style: { marginTop: "10px" },
         onclick: () => {
-          navigator.clipboard?.writeText(`Escala UTI\nEmail: ${email}\nSenha provisoria: ${password}`)
+          navigator.clipboard?.writeText(`Escala UTI\nEmail: ${email}\nSenha provisória: ${password}`)
             .then(() => toast("Copiado."), () => toast("Copie manualmente."));
         },
       }, "Copiar email e senha")),
@@ -243,8 +243,8 @@ async function paintRounds(root) {
     h("div", { class: "bar" }, h("span", null, "Diaristas"), h("span", { class: "mono" }, String(data.length))),
     h("div", { class: "card" }, h("div", { class: "card-b" },
       h("div", { class: "meta", style: { lineHeight: "1.55" } },
-        "O diarista acompanha uma UTI nos dias combinados. Ele aparece no calendario ",
-        "numa faixa separada e nao ocupa os turnos de manha, tarde ou noite."))),
+        "O diarista acompanha uma UTI nos dias combinados. Ele aparece no calendário ",
+        "numa faixa separada e não ocupa os turnos de manha, tarde ou noite."))),
     h("div", { style: { padding: "10px 12px" } },
       h("button", { class: "btn btn-block", onclick: () => editRound(null, root) },
         icon("plus"), "Adicionar diarista")),
@@ -286,7 +286,7 @@ function editRound(d, root) {
   modal({
     title: d ? "Diarista" : "Adicionar diarista",
     body: h("div", null,
-      h("label", { class: "f" }, h("span", null, "Medico"),
+      h("label", { class: "f" }, h("span", null, "Médico"),
         memberPicker(memberId, (v) => { memberId = v; }, { blank: "Escolha" })),
       h("label", { class: "f" }, h("span", null, "UTI"),
         unitPicker(unitId, (v) => { unitId = v; })),
@@ -296,7 +296,7 @@ function editRound(d, root) {
       d && h("button", {
         class: "btn btn-danger",
         onclick: async () => {
-          if (!await confirmBox("Remover diarista", "Ele some do calendario a partir de agora.", "Remover")) return;
+          if (!await confirmBox("Remover diarista", "Ele some do calendário a partir de agora.", "Remover")) return;
           const { error } = await sb.from("daily_rounds").delete().eq("id", d.id);
           if (error) return toast(niceError(error));
           close(); toast("Removido."); paintRounds(root);
@@ -305,7 +305,7 @@ function editRound(d, root) {
       h("button", {
         class: "btn btn-primary grow", style: { justifyContent: "center" },
         onclick: async (e) => {
-          if (!memberId) { err.replaceChildren(h("div", { class: "err" }, "Escolha o medico.")); return; }
+          if (!memberId) { err.replaceChildren(h("div", { class: "err" }, "Escolha o médico.")); return; }
           if (!days.size) { err.replaceChildren(h("div", { class: "err" }, "Escolha ao menos um dia.")); return; }
           e.target.disabled = true;
           const payload = { org_id: S.org.id, unit_id: unitId, member_id: memberId,
@@ -338,16 +338,16 @@ async function settingsTab() {
       h("label", { class: "card-row", style: { gap: "10px", alignItems: "flex-start" } },
         h("div", { style: { paddingTop: "2px" } }, adminOk),
         h("div", null,
-          h("div", { class: "strong" }, "Coordenacao tambem precisa confirmar"),
+          h("div", { class: "strong" }, "Coordenação também precisa confirmar"),
           h("div", { class: "meta" },
-            "Alem dos dois medicos, a troca so entra depois que a coordenacao aprova."))),
+            "Alem dos dois médicos, a troca só entra depois que a coordenação aprova."))),
       h("hr", { style: { border: "0", borderTop: "1px solid var(--rule-2)", margin: "12px 0" } }),
       h("label", { class: "card-row", style: { gap: "10px", alignItems: "flex-start" } },
         h("div", { style: { paddingTop: "2px" } }, autoTake),
         h("div", null,
-          h("div", { class: "strong" }, "Plantao cedido e assumido na hora"),
+          h("div", { class: "strong" }, "Plantão cedido e assumido na hora"),
           h("div", { class: "meta" },
-            "Quem pegar um plantao cedido assume direto, sem esperar o dono confirmar de novo."))),
+            "Quem pegar um plantão cedido assume direto, sem esperar o dono confirmar de novo."))),
       h("button", {
         class: "btn btn-primary btn-block", style: { marginTop: "14px" },
         onclick: async (e) => {

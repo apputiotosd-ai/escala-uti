@@ -1,7 +1,7 @@
 {
   "name": "Escala UTI",
   "short_name": "Escala UTI",
-  "description": "Escala de plantao das UTIs, trocas e cessoes.",
+  "description": "Escala de plantão das UTIs, trocas e cessões.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "./",

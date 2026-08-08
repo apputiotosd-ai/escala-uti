@@ -1,7 +1,7 @@
 // Datas sempre como texto AAAA-MM-DD para nao pegar fuso pelo caminho.
 
 export const DOW  = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
-export const DOW3 = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+export const DOW3 = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 export const MONTHS = ["janeiro", "fevereiro", "marco", "abril", "maio", "junho",
                        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 

@@ -18,11 +18,11 @@ const app = document.getElementById("app");
 
 const ROUTES = {
   "/escala":     { title: "Escala",     view: scheduleView },
-  "/meus":       { title: "Meus plantoes", view: myShiftsView },
+  "/meus":       { title: "Meus plantões", view: myShiftsView },
   "/mural":      { title: "Mural",      view: boardView },
-  "/pendencias": { title: "Pendencias", view: pendingView },
+  "/pendencias": { title: "Pendências", view: pendingView },
   "/perfil":     { title: "Perfil",     view: profileView },
-  "/admin":      { title: "Coordenacao", view: adminView, admin: true },
+  "/admin":      { title: "Coordenação", view: adminView, admin: true },
 };
 
 const NAV = [
@@ -45,7 +45,7 @@ let avisoLogin = null;      // frase mostrada no login depois de a sessao cair
 
 /** Sessao caiu: limpa e devolve ao login com uma frase que se entende. */
 async function sessaoCaiu() {
-  avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+  avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
   try { await sb.auth.signOut({ scope: "local" }); } catch { /* segue */ }
   S.user = null; S.org = null; S.me = null; S.memberships = [];
   render();
@@ -57,7 +57,7 @@ function topBar() {
     h("div", { class: "top-in wrap" },
       h("img", { class: "top-mark", src: "./assets/mark.png", alt: "", "aria-hidden": "true" }),
       h("div", { class: "grow", style: { minWidth: 0 } },
-        h("div", { class: "sub" }, "Escala de plantao"),
+        h("div", { class: "sub" }, "Escala de plantão"),
         many
           ? h("select", {
               class: "inp",
@@ -70,8 +70,8 @@ function topBar() {
           : h("h1", null, S.org.short_name || S.org.name)),
       h("div", { class: "top-actions" },
         isAdmin() && h("a", {
-          class: "btn btn-icon", href: "#/admin", "aria-label": "Coordenacao",
-          title: "Coordenacao",
+          class: "btn btn-icon", href: "#/admin", "aria-label": "Coordenação",
+          title: "Coordenação",
         }, icon("cog")))));
 }
 
@@ -118,7 +118,7 @@ export async function render() {
       h("div", { class: "login-box" },
         h("h2", null, "Conta sem escala"),
         h("p", { class: "sub" },
-          "Seu acesso existe, mas ainda nao esta ligado a nenhuma escala. Fale com a coordenacao."),
+          "Seu acesso existe, mas ainda não está ligado a nenhuma escala. Fale com a coordenação."),
         h("button", { class: "btn btn-block", onclick: signOut }, "Sair"))));
   }
 
@@ -135,7 +135,7 @@ export async function render() {
   } catch (e) {
     if (token !== renderToken) return;
     if (sessaoExpirada(e)) return sessaoCaiu();
-    mount(body, errorBox(e?.message || "Nao consegui carregar esta tela."));
+    mount(body, errorBox(e?.message || "Não consegui carregar esta tela."));
   }
   ajustaTopo();
 
@@ -156,9 +156,11 @@ export async function signOut() {
 }
 
 async function onAuthed() {
-  const ok = await boot();
-  if (!ok) return render();
+  await boot();
   render();
+  // primeira entrada neste aparelho: ensina os dois passos que dependem do médico
+  const { jaViuBoasVindas, abrirBoasVindas } = await import("./views/boas-vindas.js");
+  if (S.org && !jaViuBoasVindas()) setTimeout(() => abrirBoasVindas(), 900);
 }
 
 window.addEventListener("hashchange", render);
@@ -176,14 +178,14 @@ sb.auth.onAuthStateChange((event, session) => {
   try {
     const entrou = await boot();
     if (!entrou && tinhaSessao) {
-      avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+      avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
     }
   } catch (e) {
     if (sessaoExpirada(e)) {
-      avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+      avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
       S.user = null;
     } else {
-      mount(app, errorBox("Nao consegui falar com o servidor. " + (e?.message || "")));
+      mount(app, errorBox("Não consegui falar com o servidor. " + (e?.message || "")));
       return;
     }
   }

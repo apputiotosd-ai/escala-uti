@@ -27,15 +27,15 @@ async function paint(root) {
 
   mount(root,
     h("div", { class: "bar" },
-      h("span", null, "Meus plantoes"),
-      h("span", { class: "mono" }, "proximos 6 meses")),
+      h("span", null, "Meus plantões"),
+      h("span", { class: "mono" }, "próximos 6 meses")),
 
     total === 0
-      ? emptyState("Voce nao tem plantao marcado daqui para a frente.", "clock")
+      ? emptyState("Você não tem plantão marcado daqui para a frente.", "clock")
       : h("div", null,
           h("div", { class: "card" },
             h("div", { class: "card-b card-row", style: { gap: "16px" } },
-              stat(total, total === 1 ? "plantao" : "plantoes"),
+              stat(total, total === 1 ? "plantão" : "plantões"),
               stat(noites, noites === 1 ? "noite" : "noites"),
               stat(fds, "fim de semana", "fins de semana"),
               stat(horas, "hora", "horas"))),
@@ -62,7 +62,7 @@ function listaPorMes(rows, noMural, root) {
       box.append(h("div", { class: "bar", style: { marginTop: "14px" } },
         h("span", null, monthLabel(y, m - 1)),
         h("span", { class: "mono" },
-          doMes.length === 1 ? "1 plantao" : `${doMes.length} plantoes`)));
+          doMes.length === 1 ? "1 plantão" : `${doMes.length} plantões`)));
     }
     box.append(linha(r, noMural, root));
   }

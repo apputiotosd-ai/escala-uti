@@ -16,7 +16,7 @@ async function paint(root) {
   const me = S.byId.get(S.me.id) || S.me;
 
   const display = h("input", { class: "inp", value: me.display_name || "",
-    placeholder: "Como seu nome aparece no calendario", maxlength: 24 });
+    placeholder: "Como seu nome aparece no calendário", maxlength: 24 });
   const phone = h("input", { class: "inp", value: me.phone || "",
     type: "tel", inputmode: "tel", placeholder: "(85) 90000-0000" });
 
@@ -40,13 +40,13 @@ async function paint(root) {
     h("div", { class: "card" }, h("div", { class: "card-b" }, avaBox)),
 
     h("div", { class: "card" }, h("div", { class: "card-b" },
-      h("label", { class: "f" }, h("span", null, "Nome curto no calendario"), display),
+      h("label", { class: "f" }, h("span", null, "Nome curto no calendário"), display),
       h("label", { class: "f" }, h("span", null, "Telefone"), phone),
       h("button", {
         class: "btn btn-primary btn-block",
         onclick: async (e) => {
           e.target.disabled = true;
-          // manda o texto como esta: vazio significa apagar, e nao "nao mexe"
+          // manda o texto como esta: vazio significa apagar, e nao "não mexe"
           const { error } = await sb.rpc("update_my_profile", {
             p_org: S.org.id,
             p_display_name: display.value.trim(),
@@ -77,13 +77,22 @@ async function paint(root) {
       ? h("div", { class: "adminlist" }, notes.map(noteRow))
       : emptyState("Nenhum aviso.", "bell"),
 
+    h("div", { style: { padding: "10px 12px 0" } },
+      h("button", {
+        class: "btn btn-block",
+        onclick: async () => {
+          const { abrirBoasVindas } = await import("./boas-vindas.js");
+          abrirBoasVindas({ forcado: true });
+        },
+      }, icon("install"), "Ver o passo a passo de instalação e aviso")),
+
     h("div", { style: { padding: "18px 12px 30px" } },
       isAdmin() && h("a", { class: "btn btn-block", href: "#/admin",
-        style: { marginBottom: "8px" } }, icon("cog"), "Area da coordenacao"),
+        style: { marginBottom: "8px" } }, icon("cog"), "Área da coordenação"),
       h("button", { class: "btn btn-block", onclick: signOut }, icon("out"), "Sair"),
       h("p", { class: "meta", style: { textAlign: "center", marginTop: "16px", lineHeight: "1.6" } },
         "Para instalar no celular: abra no navegador, toque em compartilhar e escolha ",
-        h("span", { class: "strong" }, "Adicionar a Tela de Inicio"), ".")));
+        h("span", { class: "strong" }, "Adicionar a Tela de Início"), ".")));
 }
 
 /**
@@ -99,15 +108,15 @@ function blocoPush() {
 
     if (!suportaPush()) {
       return mount(caixa, h("div", { class: "card-b meta" },
-        "Este navegador nao recebe aviso. Abra o app no Safari do iPhone ou no Chrome."));
+        "Este navegador não recebe aviso. Abra o app no Safari do iPhone ou no Chrome."));
     }
     if (precisaInstalar()) {
       return mount(caixa, h("div", { class: "card-b" },
         h("div", { class: "strong", style: { fontSize: "13.5px" } },
           "Instale o app antes de ligar o aviso"),
         h("div", { class: "meta", style: { marginTop: "4px", lineHeight: "1.5" } },
-          "No iPhone, o aviso so funciona com o app na tela de inicio. ",
-          "Toque em compartilhar no Safari e escolha Adicionar a Tela de Inicio.")));
+          "No iPhone, o aviso só funciona com o app na tela de início. ",
+          "Toque em compartilhar no Safari e escolha Adicionar a Tela de Início.")));
     }
 
     const sub = await inscricaoAtual();
@@ -122,10 +131,10 @@ function blocoPush() {
             sub ? "Aviso ligado neste aparelho" : "Aviso desligado"),
           h("div", { class: "meta", style: { lineHeight: "1.5" } },
             sub
-              ? "Voce recebe aviso de troca, cessao e plantao vago mesmo com o app fechado."
+              ? "Você recebe aviso de troca, cessão e plantão vago mesmo com o app fechado."
               : bloqueado
-                ? "Voce bloqueou o aviso para este site. Libere nos ajustes do navegador."
-                : "Ligue para saber de troca e cessao sem precisar abrir o app.")),
+                ? "Você bloqueou o aviso para este site. Libere nos ajustes do navegador."
+                : "Ligue para saber de troca e cessão sem precisar abrir o app.")),
         h("button", {
           class: sub ? "btn btn-sm" : "btn btn-sm btn-primary",
           disabled: bloqueado && !sub,
@@ -194,7 +203,7 @@ function squareResize(file, size) {
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
       URL.revokeObjectURL(img.src);
-      c.toBlob((b) => (b ? resolve(b) : reject(new Error("Nao consegui processar a imagem."))),
+      c.toBlob((b) => (b ? resolve(b) : reject(new Error("Não consegui processar a imagem."))),
                "image/jpeg", 0.85);
     };
     img.onerror = () => reject(new Error("Arquivo de imagem invalido."));

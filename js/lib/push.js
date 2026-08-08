@@ -45,9 +45,9 @@ function nomeAparelho() {
 
 /** Pede permissao e registra o aparelho. Devolve o motivo quando nao da. */
 export async function ativarPush() {
-  if (!suportaPush()) return { ok: false, motivo: "Este navegador nao recebe aviso." };
+  if (!suportaPush()) return { ok: false, motivo: "Este navegador não recebe aviso." };
   if (precisaInstalar()) {
-    return { ok: false, motivo: "No iPhone, instale o app na tela de inicio antes de ligar o aviso." };
+    return { ok: false, motivo: "No iPhone, instale o app na tela de início antes de ligar o aviso." };
   }
 
   const p = await Notification.requestPermission();
@@ -55,8 +55,8 @@ export async function ativarPush() {
     return {
       ok: false,
       motivo: p === "denied"
-        ? "Voce bloqueou o aviso para este site. Libere nos ajustes do navegador."
-        : "Permissao nao concedida.",
+        ? "Você bloqueou o aviso para este site. Libere nos ajustes do navegador."
+        : "Permissão não concedida.",
     };
   }
 

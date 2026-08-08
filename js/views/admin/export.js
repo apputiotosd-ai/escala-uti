@@ -10,7 +10,7 @@ import { SHIFTS, SHIFT_INFO } from "../../config.js";
 // horas por turno, usadas no fechamento
 const HORAS = { M: 6, T: 6, SN: 12 };
 const ORIGEM = {
-  escala: "escala fixa", troca: "troca", cessao: "cessao", admin: "ajuste da coordenacao",
+  escala: "escala fixa", troca: "troca", cessao: "cessão", admin: "ajuste da coordenação",
 };
 
 const vista = { y: null, m: null };
@@ -39,17 +39,17 @@ async function paint(root) {
   const vagos = linhas.filter((l) => !l.medico).length;
 
   mount(root,
-    h("div", { class: "bar" }, h("span", null, "Fechamento do mes")),
+    h("div", { class: "bar" }, h("span", null, "Fechamento do mês")),
 
     h("div", { class: "monthbar" },
-      h("button", { class: "btn btn-icon", onclick: () => passo(-1), "aria-label": "Mes anterior" }, icon("left")),
+      h("button", { class: "btn btn-icon", onclick: () => passo(-1), "aria-label": "Mês anterior" }, icon("left")),
       h("span", { class: "label" }, monthLabel(vista.y, vista.m)),
-      h("button", { class: "btn btn-icon", onclick: () => passo(1), "aria-label": "Proximo mes" }, icon("right"))),
+      h("button", { class: "btn btn-icon", onclick: () => passo(1), "aria-label": "Próximo mês" }, icon("right"))),
 
     h("div", { class: "card" }, h("div", { class: "card-b" },
       h("div", { class: "card-row", style: { gap: "18px", marginBottom: "12px" } },
         num(linhas.length, "turnos"),
-        num(resumo.length, "medicos"),
+        num(resumo.length, "médicos"),
         num(linhas.reduce((s, l) => s + (l.medico ? HORAS[l.shift] : 0), 0), "horas"),
         vagos ? num(vagos, "vagos") : null),
 
@@ -62,8 +62,8 @@ async function paint(root) {
       h("button", {
         class: "btn btn-block", style: { marginBottom: "8px" },
         onclick: () => baixaCsv(resumoCsv(resumo),
-          `escala-${vista.y}-${String(vista.m + 1).padStart(2, "0")}-por-medico.csv`),
-      }, icon("user"), "Baixar total por medico"),
+          `escala-${vista.y}-${String(vista.m + 1).padStart(2, "0")}-por-médico.csv`),
+      }, icon("user"), "Baixar total por médico"),
 
       h("button", {
         class: "btn btn-primary btn-block",
@@ -71,8 +71,8 @@ async function paint(root) {
       }, icon("board"), "Imprimir ou salvar em PDF"),
 
       h("p", { class: "meta", style: { marginTop: "10px", lineHeight: "1.55" } },
-        "As planilhas abrem no Excel. Elas ja vem com as trocas e cessoes aplicadas, ",
-        "entao mostram quem realmente ficou no plantao, nao quem estava na escala fixa."))),
+        "As planilhas abrem no Excel. Elas já vem com as trocas e cessões aplicadas, ",
+        "então mostram quem realmente ficou no plantão, não quem estava na escala fixa."))),
 
     // area que sai na impressao
     relatorio(linhas, resumo, vagos));
@@ -131,8 +131,8 @@ const csv = (linhas) => "﻿" + linhas.map((l) =>
   }).join(";")).join("\r\n");
 
 function detalhadoCsv(linhas) {
-  const out = [["Data", "Dia", "UTI", "Turno", "Horario", "Horas",
-                "Medico", "Registro", "Origem", "Escala fixa previa"]];
+  const out = [["Data", "Dia", "UTI", "Turno", "Horário", "Horas",
+                "Médico", "Registro", "Origem", "Escala fixa previa"]];
   for (const l of linhas) {
     out.push([
       br(l.date), DOW3[dow(l.date)], l.unit, l.shift, SHIFT_INFO[l.shift].hours,
@@ -147,7 +147,7 @@ function detalhadoCsv(linhas) {
 }
 
 function resumoCsv(resumo) {
-  const out = [["Medico", "Registro", "Manhas", "Tardes", "Noites", "Plantoes", "Horas"]];
+  const out = [["Médico", "Registro", "Manhas", "Tardes", "Noites", "Plantões", "Horas"]];
   for (const r of resumo) {
     out.push([r.nome, r.registro, r.M, r.T, r.SN, r.M + r.T + r.SN, r.horas]);
   }
@@ -193,21 +193,21 @@ function relatorio(linhas, resumo, vagos) {
             curto(l.medico.full_name));
         }))))));
 
-  return h("section", { class: "print-area" },
+  return h("section", { class: "print-área" },
     h("header", { class: "rel-cab" },
       h("img", { src: "./assets/logo.png", alt: "", class: "rel-logo" }),
       h("div", null,
-        h("h2", null, "Escala de plantao ", MONTHS[vista.m], " de ", vista.y),
+        h("h2", null, "Escala de plantão ", MONTHS[vista.m], " de ", vista.y),
         h("div", { class: "meta" }, S.org.name, " | UTI Adulto"),
         h("div", { class: "meta" }, "Emitido em ", br(today()),
           vagos ? ` | ${vagos} turno${vagos > 1 ? "s" : ""} sem plantonista` : ""))),
     h("div", { class: "rel-wrap" }, tabela),
-    h("h3", { class: "rel-h3" }, "Total por medico"),
+    h("h3", { class: "rel-h3" }, "Total por médico"),
     h("table", { class: "rel" },
       h("thead", null, h("tr", null,
-        h("th", { style: { textAlign: "left" } }, "Medico"),
+        h("th", { style: { textAlign: "left" } }, "Médico"),
         h("th", null, "Registro"), h("th", null, "M"), h("th", null, "T"),
-        h("th", null, "SN"), h("th", null, "Plantoes"), h("th", null, "Horas"))),
+        h("th", null, "SN"), h("th", null, "Plantões"), h("th", null, "Horas"))),
       h("tbody", null,
         resumo.map((r) => h("tr", null,
           h("td", { style: { textAlign: "left" } }, r.nome),
@@ -225,7 +225,7 @@ function relatorio(linhas, resumo, vagos) {
           h("td", { class: "mono" }, String(resumo.reduce((s, r) => s + r.M + r.T + r.SN, 0))),
           h("td", { class: "mono strong" }, String(resumo.reduce((s, r) => s + r.horas, 0)))))),
     h("p", { class: "rel-nota" },
-      "Nome em italico indica plantao que mudou de dono por troca, cessao ou ajuste da coordenacao. ",
+      "Nome em italico indica plantão que mudou de dono por troca, cessão ou ajuste da coordenação. ",
       "M das 07h as 13h, T das 13h as 19h, SN das 19h as 07h."));
 }
 

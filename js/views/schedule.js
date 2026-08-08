@@ -43,7 +43,7 @@ async function paint(root) {
     dayList(sch, b, single ? [S.unitById.get(view.unit)] : S.units, root),
     single ? monthGrid(sch, b, S.unitById.get(view.unit), root) : null);
 
-  // com "Todas" nao existe grade de mes: a lista serve nas duas larguras
+  // com "Todas" não éxiste grade de mes: a lista serve nas duas larguras
   body.querySelector(".daylist").style.display = single ? "" : "block";
 
   // a lista do mes e longa. Na primeira abertura do mes corrente,
@@ -118,9 +118,9 @@ function monthNav(root) {
   const now = new Date();
   const isNow = view.y === now.getFullYear() && view.m === now.getMonth();
   return h("div", { class: "monthbar" },
-    h("button", { class: "btn btn-icon", onclick: () => step(-1), "aria-label": "Mes anterior" }, icon("left")),
+    h("button", { class: "btn btn-icon", onclick: () => step(-1), "aria-label": "Mês anterior" }, icon("left")),
     h("span", { class: "label" }, monthLabel(view.y, view.m)),
-    h("button", { class: "btn btn-icon", onclick: () => step(1), "aria-label": "Proximo mes" }, icon("right")),
+    h("button", { class: "btn btn-icon", onclick: () => step(1), "aria-label": "Próximo mês" }, icon("right")),
     h("button", {
       class: "btn btn-sm", style: { marginLeft: "8px", visibility: isNow ? "hidden" : "" },
       onclick: () => {
@@ -165,11 +165,11 @@ function dayList(sch, b, units, root) {
   if (!any) {
     list.replaceChildren(h("div", { class: "empty" },
       icon("empty"),
-      h("div", null, "A escala fixa ainda nao foi preenchida."),
+      h("div", null, "A escala fixa ainda não foi preenchida."),
       isAdmin()
         ? h("a", { class: "btn btn-primary", href: "#/admin",
                    style: { marginTop: "14px" } }, "Preencher a escala fixa")
-        : h("div", { style: { marginTop: "6px" } }, "A coordenacao ainda esta montando.")));
+        : h("div", { style: { marginTop: "6px" } }, "A coordenação ainda está montando.")));
   }
   return list;
 }

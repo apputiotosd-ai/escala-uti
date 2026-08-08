@@ -21,7 +21,7 @@ const ORG_KEY = "escala-uti-org";
 
 const pad = (n) => String(n).padStart(2, "0");
 
-/** Data de hoje no fuso de quem esta usando, e nao em UTC.
+/** Data de hoje no fuso de quem esta usando, e não ém UTC.
  *  Em Fortaleza, depois das 21h o UTC ja virou o dia seguinte, e isso
  *  fazia o plantao de hoje sumir das listas. */
 export function hoje() {
@@ -56,14 +56,14 @@ export function sessaoExpirada(e) {
 
 /** Erros do Postgres chegam com prefixo tecnico. O medico nao precisa ver isso. */
 export function niceError(e) {
-  if (sessaoExpirada(e)) return "Sua sessao expirou. Entre de novo.";
-  const m = e?.message || String(e || "Nao deu certo.");
+  if (sessaoExpirada(e)) return "Sua sessão expirou. Entre de novo.";
+  const m = e?.message || String(e || "Não deu certo.");
   return m
     .replace(/^.*?(?:violates|duplicate key value violates).*unique.*$/i,
-             "Ja existe um registro igual a esse.")
+             "Já existe um registro igual a esse.")
     .replace(/^new row violates row-level security.*$/i,
-             "Voce nao tem permissao para isso.")
-    .replace(/^Failed to fetch$/i, "Sem conexao. Tente de novo.");
+             "Você não tem permissão para isso.")
+    .replace(/^Failed to fetch$/i, "Sem conexão. Tente de novo.");
 }
 
 export async function boot() {
@@ -290,7 +290,7 @@ export async function callAdminUsers(payload) {
   });
   if (error) {
     let msg = error.message;
-    try { msg = (await error.context?.json())?.error || msg; } catch { /* corpo nao era json */ }
+    try { msg = (await error.context?.json())?.error || msg; } catch { /* corpo não éra json */ }
     throw new Error(msg);
   }
   if (data?.error) throw new Error(data.error);

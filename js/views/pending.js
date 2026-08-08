@@ -27,7 +27,7 @@ async function paint(root) {
 
   mount(root,
     h("div", { class: "bar" },
-      h("span", null, "Esperando voce"),
+      h("span", null, "Esperando você"),
       h("span", { class: "mono" }, String(mine.length))),
     mine.length
       ? mine.map((e) => card(e, root, true))
@@ -48,7 +48,7 @@ async function paint(root) {
     ] : null,
 
     done.length ? [
-      h("div", { class: "bar", style: { marginTop: "18px" } }, h("span", null, "Historico")),
+      h("div", { class: "bar", style: { marginTop: "18px" } }, h("span", null, "Histórico")),
       done.slice(0, 25).map((e) => historyRow(e)),
     ] : null);
 }
@@ -77,7 +77,7 @@ function card(e, root, actionable) {
   const waiting = [];
   if (!e.from_approved_at) waiting.push(from?.full_name || "quem entrega");
   if (!e.to_approved_at) waiting.push(to?.full_name || "quem recebe");
-  if (S.org.require_admin_approval && !e.admin_approved_at) waiting.push("coordenacao");
+  if (S.org.require_admin_approval && !e.admin_approved_at) waiting.push("coordenação");
 
   return h("div", { class: "card" },
     h("div", { class: "card-b" },
@@ -87,7 +87,7 @@ function card(e, root, actionable) {
         avatar(e.to_member_id),
         h("div", { class: "grow", style: { marginLeft: "3px" } },
           h("div", { class: "strong", style: { fontSize: "13.5px" } },
-            isSwap ? "Troca de plantao" : "Cessao de plantao"),
+            isSwap ? "Troca de plantão" : "Cessão de plantão"),
           h("div", { class: "meta" },
             `${from?.full_name || "?"} e ${to?.full_name || "?"}`)),
         h("span", { class: "chip wait" }, "aguardando")),
@@ -116,7 +116,7 @@ function card(e, root, actionable) {
               h("button", {
                 class: "btn btn-sm btn-danger",
                 onclick: async () => {
-                  if (!await confirmBox("Cancelar pedido", "O pedido some e nada muda no calendario.", "Cancelar pedido")) return;
+                  if (!await confirmBox("Cancelar pedido", "O pedido some e nada muda no calendário.", "Cancelar pedido")) return;
                   const { error } = await sb.rpc("cancel_exchange", { p_id: e.id });
                   if (error) return toast(niceError(error));
                   toast("Pedido cancelado.");
@@ -130,15 +130,15 @@ async function respond(e, accept, root) {
   if (accept) {
     const isSwap = e.kind === "swap";
     const ok = await confirmBox(
-      isSwap ? "Confirmar troca" : "Confirmar cessao",
+      isSwap ? "Confirmar troca" : "Confirmar cessão",
       isSwap
-        ? "Assim que voce confirmar, os dois plantoes trocam de dono no calendario."
-        : "Assim que voce confirmar, o plantao passa para o outro medico no calendario.",
+        ? "Assim que você confirmar, os dois plantões trocam de dono no calendário."
+        : "Assim que você confirmar, o plantão passa para o outro médico no calendário.",
       "Confirmar");
     if (!ok) return;
     const { error } = await sb.rpc("respond_exchange", { p_id: e.id, p_accept: true, p_reason: null });
     if (error) return toast(niceError(error));
-    toast("Confirmado. O calendario ja mudou.");
+    toast("Confirmado. O calendario já mudou.");
     reload(root);
     return;
   }
@@ -148,7 +148,7 @@ async function respond(e, accept, root) {
     title: "Recusar pedido",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: 0 } },
-        "O outro medico recebe o aviso e nada muda no calendario."),
+        "O outro médico recebe o aviso e nada muda no calendário."),
       h("label", { class: "f" }, h("span", null, "Motivo"), reason)),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),

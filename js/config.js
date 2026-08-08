@@ -1,5 +1,5 @@
 // Chave publicavel: e feita para ficar exposta no navegador.
-// Quem protege os dados sao as regras de acesso do banco, nao esta chave.
+// Quem protege os dados sao as regras de acesso do banco, não ésta chave.
 export const SUPABASE_URL = "https://meyoapxqnbeyrnvhmwtu.supabase.co";
 export const SUPABASE_KEY = "sb_publishable_uhJ4OHDy2VULCJTFtWFLDw_-6rISPEX";
 

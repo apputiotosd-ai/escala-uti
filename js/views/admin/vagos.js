@@ -36,7 +36,7 @@ async function paint(root) {
       h("span", { class: "mono" }, String(comFila.length))),
     comFila.length
       ? comFila.map((v) => cartao(v, fila.get(interestKey(v.unit_id, v.work_date, v.shift)), root))
-      : emptyState("Nenhum plantao vago tem candidato no momento.", "bell"),
+      : emptyState("Nenhum plantão vago tem candidato no momento.", "bell"),
 
     h("div", { class: "bar", style: { marginTop: "18px" } },
       h("span", null, "Sem candidato"),
@@ -63,7 +63,7 @@ function cartao(v, candidatos, root) {
 
       previa && h("div", { class: "meta", style: { marginTop: "6px" } },
         "A escala fixa previa ", h("span", { class: "strong" }, previa.full_name),
-        " nesta posicao do ciclo."),
+        " nesta posição do ciclo."),
 
       candidatos.length
         ? h("div", { style: { marginTop: "10px", border: "1px solid var(--rule)" } },
@@ -87,20 +87,20 @@ function cartao(v, candidatos, root) {
                   class: "btn btn-sm btn-danger",
                   onclick: () => recusar(it, root),
                 }, "Recusar")))))
-        : h("div", { class: "meta", style: { marginTop: "8px" } }, "Ninguem se candidatou."),
+        : h("div", { class: "meta", style: { marginTop: "8px" } }, "Ninguém se candidatou."),
 
       h("div", { style: { marginTop: "10px" } },
         h("button", {
           class: "btn btn-sm",
           onclick: () => escalarDireto(v, unit, root),
-        }, icon("plus"), "Escalar alguem de fora da fila"))));
+        }, icon("plus"), "Escalar alguém de fora da fila"))));
 }
 
 async function escalar(it, v, unit, root) {
-  const nome = S.byId.get(it.member_id)?.full_name || "o medico";
-  if (!await confirmBox("Escalar este medico",
+  const nome = S.byId.get(it.member_id)?.full_name || "o médico";
+  if (!await confirmBox("Escalar este médico",
     `${nome} assume ${brDow(v.work_date)}, ${unit?.name}, turno ${v.shift}. ` +
-    "Os outros candidatos sao avisados. A escala fixa nao muda.", "Escalar")) return;
+    "Os outros candidatos são avisados. A escala fixa não muda.", "Escalar")) return;
   const { error } = await sb.rpc("grant_interest", { p_id: it.id });
   if (error) return toast(niceError(error));
   toast("Escalado.");
@@ -113,7 +113,7 @@ async function recusar(it, root) {
     title: "Recusar candidatura",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: 0 } },
-        "O medico recebe o aviso e o plantao continua vago."),
+        "O médico recebe o aviso e o plantão continua vago."),
       h("label", { class: "f" }, h("span", null, "Motivo"), motivo)),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),
@@ -142,21 +142,21 @@ function escalarDireto(v, unit, root) {
       h("p", { class: "meta", style: { marginTop: 0 } },
         `${unit?.name} | ${brDow(v.work_date)} | ${SHIFT_INFO[v.shift].label}`),
       h("p", { style: { fontSize: "13.5px" } },
-        "Vale so para esta data. A escala fixa continua como esta."),
+        "Vale só para esta data. A escala fixa continua como está."),
       h("label", { class: "f" }, h("span", null, "Plantonista"),
-        memberPicker(null, (x) => { escolhido = x; }, { blank: "Escolha o medico" })),
+        memberPicker(null, (x) => { escolhido = x; }, { blank: "Escolha o médico" })),
       err),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),
       h("button", {
         class: "btn btn-primary",
         onclick: async (e) => {
-          if (!escolhido) { err.replaceChildren(h("div", { class: "err" }, "Escolha o medico.")); return; }
+          if (!escolhido) { err.replaceChildren(h("div", { class: "err" }, "Escolha o médico.")); return; }
           e.target.disabled = true;
           const { error } = await sb.rpc("admin_set_shift", {
             p_org: S.org.id, p_unit: v.unit_id, p_date: v.work_date,
             p_shift: v.shift, p_member: escolhido,
-            p_note: "Plantao vago preenchido pela coordenacao",
+            p_note: "Plantão vago preenchido pela coordenação",
           });
           e.target.disabled = false;
           if (error) { err.replaceChildren(h("div", { class: "err" }, niceError(error))); return; }

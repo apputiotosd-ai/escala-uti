@@ -33,11 +33,11 @@ export function openShiftSheet({ date, unit, shift, row, onChanged }) {
             linhaWhats(m.phone),
             was && h("div", { class: "meta" },
               h("span", { style: { textDecoration: "line-through" } }, was.full_name),
-              " passou o plantao")))
-      : h("div", { class: "err", style: { margin: "10px 0" } }, "Este turno esta sem plantonista."),
+              " passou o plantão")))
+      : h("div", { class: "err", style: { margin: "10px 0" } }, "Este turno está sem plantonista."),
 
     fila,
-    past && h("p", { class: "meta" }, "Plantao ja realizado."));
+    past && h("p", { class: "meta" }, "Plantão já realizado."));
 
   if (!m && !past) carregaFila(fila, unit, date, shift, onChanged);
 
@@ -96,15 +96,15 @@ async function carregaFila(alvo, unit, date, shift, onChanged) {
         h("div", { class: "grow" },
           h("div", { style: { fontSize: "13.5px" } },
             S.byId.get(it.member_id)?.full_name || "?",
-            it.member_id === S.me.id && h("span", { class: "chip", style: { marginLeft: "6px" } }, "voce")),
+            it.member_id === S.me.id && h("span", { class: "chip", style: { marginLeft: "6px" } }, "você")),
           h("div", { class: "meta mono" }, brDateTime(it.created_at), "  ", haQuanto(it.created_at)),
           it.note && h("div", { class: "meta" }, it.note)),
         isAdmin() && h("button", {
           class: "btn btn-sm btn-primary",
           onclick: async (e) => {
-            if (!await confirmBox("Escalar este medico",
+            if (!await confirmBox("Escalar este médico",
               `${S.byId.get(it.member_id)?.full_name} assume ${brDow(date)}, ${unit.name}, turno ${shift}. ` +
-              "Os outros interessados sao avisados.", "Escalar")) return;
+              "Os outros interessados são avisados.", "Escalar")) return;
             e.target.disabled = true;
             const { error } = await sb.rpc("grant_interest", { p_id: it.id });
             if (error) { e.target.disabled = false; return toast(niceError(error)); }
@@ -116,7 +116,7 @@ async function carregaFila(alvo, unit, date, shift, onChanged) {
 }
 
 function manifestar({ date, unit, shift, onChanged }) {
-  const note = h("textarea", { class: "inp", rows: 2, placeholder: "Recado para a coordenacao" });
+  const note = h("textarea", { class: "inp", rows: 2, placeholder: "Recado para a coordenação" });
   const err = h("div");
   modal({
     title: "Manifestar interesse",
@@ -124,9 +124,9 @@ function manifestar({ date, unit, shift, onChanged }) {
       h("p", { class: "meta", style: { marginTop: 0 } },
         `${unit.name} | ${brDow(date)} | ${SHIFT_INFO[shift].label} ${SHIFT_INFO[shift].hours}`),
       h("p", { style: { fontSize: "13.5px" } },
-        "Este turno esta sem plantonista. Voce entra na fila e a coordenacao decide quem assume. ",
-        "A data e a hora da sua manifestacao ficam registradas."),
-      h("label", { class: "f" }, h("span", null, "Observacao"), note),
+        "Este turno está sem plantonista. Você entra na fila e a coordenação decide quem assume. ",
+        "A data e a hora da sua manifestação ficam registradas."),
+      h("label", { class: "f" }, h("span", null, "Observação"), note),
       err),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),
@@ -141,7 +141,7 @@ function manifestar({ date, unit, shift, onChanged }) {
           e.target.disabled = false;
           if (error) { err.replaceChildren(h("div", { class: "err" }, niceError(error))); return; }
           close();
-          toast("Interesse registrado. A coordenacao vai avaliar.");
+          toast("Interesse registrado. A coordenação vai avaliar.");
           onChanged?.();
         },
       }, "Confirmar interesse"),
@@ -153,20 +153,20 @@ function manifestar({ date, unit, shift, onChanged }) {
 function openOffer({ date, unit, shift, kind, onChanged }) {
   const note = h("textarea", { class: "inp", rows: 2,
     placeholder: kind === "giveaway" ? "Algum recado para quem for pegar" : "Algum recado" });
-  const wanted = h("input", { class: "inp", placeholder: "Ex: aceito qualquer sabado de setembro" });
+  const wanted = h("input", { class: "inp", placeholder: "Ex: aceito qualquer sábado de setembro" });
   const err = h("div");
 
   modal({
-    title: kind === "giveaway" ? "Ceder plantao" : "Oferecer para troca",
+    title: kind === "giveaway" ? "Ceder plantão" : "Oferecer para troca",
     body: h("div", null,
       h("p", { class: "meta", style: { marginTop: "0" } },
         `${unit.name} | ${brDow(date)} | ${SHIFT_INFO[shift].label} ${SHIFT_INFO[shift].hours}`),
       h("p", { style: { fontSize: "13.5px" } },
         kind === "giveaway"
-          ? "O plantao vai para o mural. Quando alguem pegar, voce confirma e a mudanca entra no calendario."
-          : "O plantao vai para o mural marcado como troca. Quem tiver interesse propoe uma data e voce decide."),
-      kind === "swap" && h("label", { class: "f" }, h("span", null, "O que voce aceita em troca"), wanted),
-      h("label", { class: "f" }, h("span", null, "Observacao"), note),
+          ? "O plantão vai para o mural. Quando alguém pegar, você confirma e a mudança entra no calendário."
+          : "O plantão vai para o mural marcado como troca. Quem tiver interesse propoe uma data e você decide."),
+      kind === "swap" && h("label", { class: "f" }, h("span", null, "O que você aceita em troca"), wanted),
+      h("label", { class: "f" }, h("span", null, "Observação"), note),
       err),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),
@@ -193,28 +193,28 @@ function openOffer({ date, unit, shift, kind, onChanged }) {
 /* ---------- propor troca com o plantao de outro medico ---------- */
 export function openProposeSwap({ date, unit, shift, onChanged, offerId = null }) {
   const err = h("div");
-  const sel = h("select", { class: "inp" }, h("option", { value: "" }, "Carregando seus plantoes"));
-  const note = h("textarea", { class: "inp", rows: 2, placeholder: "Observacao" });
+  const sel = h("select", { class: "inp" }, h("option", { value: "" }, "Carregando seus plantões"));
+  const note = h("textarea", { class: "inp", rows: 2, placeholder: "Observação" });
 
   myShifts(180).then((rows) => {
     const options = rows.filter((r) => !(r.work_date === date && r.shift === shift && r.unit_id === unit.id));
     sel.replaceChildren();
     if (!options.length) {
-      sel.append(h("option", { value: "" }, "Voce nao tem plantao para oferecer"));
+      sel.append(h("option", { value: "" }, "Você não tem plantão para oferecer"));
       return;
     }
-    sel.append(h("option", { value: "" }, "Escolha um plantao seu"));
+    sel.append(h("option", { value: "" }, "Escolha um plantão seu"));
     for (const r of options) {
       sel.append(h("option", { value: `${r.unit_id}|${r.work_date}|${r.shift}` },
         `${brDow(r.work_date)} | ${S.unitById.get(r.unit_id)?.name} | ${r.shift}`));
     }
-  }).catch(() => sel.replaceChildren(h("option", { value: "" }, "Nao consegui carregar")));
+  }).catch(() => sel.replaceChildren(h("option", { value: "" }, "Não consegui carregar")));
 
   modal({
     title: "Propor troca",
     body: h("div", null,
       h("p", { style: { fontSize: "13.5px", marginTop: "0" } },
-        "Voce assume o plantao abaixo e entrega um plantao seu no lugar. A troca so vale depois que o outro medico confirmar."),
+        "Você assume o plantão abaixo e entrega um plantão seu no lugar. A troca só vale depois que o outro médico confirmar."),
       h("div", { class: "card", style: { margin: "0 0 12px" } },
         h("div", { class: "card-b card-row", style: { gap: "8px" } },
           h("span", { class: `tick ${shift}`, style: { height: "30px" } }),
@@ -222,15 +222,15 @@ export function openProposeSwap({ date, unit, shift, onChanged, offerId = null }
             h("div", { class: "t-date mono" }, brDow(date)),
             h("div", { class: "meta" }, `${unit.name} | ${SHIFT_INFO[shift].hours}`)),
           shiftBadge(shift))),
-      h("label", { class: "f" }, h("span", null, "Plantao que voce entrega"), sel),
-      h("label", { class: "f" }, h("span", null, "Observacao"), note),
+      h("label", { class: "f" }, h("span", null, "Plantão que você entrega"), sel),
+      h("label", { class: "f" }, h("span", null, "Observação"), note),
       err),
     actions: (close) => [
       h("button", { class: "btn", onclick: close }, "Voltar"),
       h("button", {
         class: "btn btn-primary",
         onclick: async (e) => {
-          if (!sel.value) { err.replaceChildren(h("div", { class: "err" }, "Escolha qual plantao voce entrega.")); return; }
+          if (!sel.value) { err.replaceChildren(h("div", { class: "err" }, "Escolha qual plantão você entrega.")); return; }
           const [mu, md, ms] = sel.value.split("|");
           e.target.disabled = true;
           const { error } = await sb.rpc("propose_swap", {
@@ -242,7 +242,7 @@ export function openProposeSwap({ date, unit, shift, onChanged, offerId = null }
           e.target.disabled = false;
           if (error) { err.replaceChildren(h("div", { class: "err" }, niceError(error))); return; }
           close();
-          toast("Proposta enviada. Agora e esperar a confirmacao.");
+          toast("Proposta enviada. Agora e esperar a confirmação.");
           onChanged?.();
         },
       }, "Enviar proposta"),
@@ -262,7 +262,7 @@ function openAdminSet({ date, unit, shift, row, onChanged }) {
       h("p", { class: "meta", style: { marginTop: "0" } },
         `${unit.name} | ${brDow(date)} | ${SHIFT_INFO[shift].label}`),
       h("p", { style: { fontSize: "13.5px" } },
-        "Isso muda so este dia. A escala fixa continua como esta."),
+        "Isso muda só este dia. A escala fixa continua como está."),
       h("label", { class: "f" }, h("span", null, "Plantonista"),
         memberPicker(chosen, (v) => { chosen = v; }, { blank: "Deixar sem plantonista" })),
       h("label", { class: "f" }, h("span", null, "Motivo"), note),
