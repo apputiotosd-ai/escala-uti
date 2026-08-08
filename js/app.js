@@ -1,6 +1,8 @@
 import { h, mount, clear } from "./lib/dom.js";
 import { icon } from "./lib/icons.js";
-import { S, sb, boot, isAdmin, refreshUnread, loadExchanges, awaitingMe, setOrg } from "./store.js";
+import {
+  S, sb, boot, isAdmin, refreshUnread, loadExchanges, awaitingMe, setOrg, sessaoExpirada,
+} from "./store.js";
 import { loading, errorBox } from "./lib/ui.js";
 import { ajustaTopo } from "./lib/sticky.js";
 
@@ -39,6 +41,15 @@ function currentPath() {
 }
 
 let pendingCount = 0;
+let avisoLogin = null;      // frase mostrada no login depois de a sessao cair
+
+/** Sessao caiu: limpa e devolve ao login com uma frase que se entende. */
+async function sessaoCaiu() {
+  avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+  try { await sb.auth.signOut({ scope: "local" }); } catch { /* segue */ }
+  S.user = null; S.org = null; S.me = null; S.memberships = [];
+  render();
+}
 
 function topBar() {
   const many = S.memberships.length > 1;
@@ -78,7 +89,10 @@ async function refreshPendingBadge() {
     const list = await loadExchanges(["pending"]);
     pendingCount = awaitingMe(list).length;
     await refreshUnread();
-  } catch { /* contador e enfeite, nao derruba a tela */ }
+  } catch (e) {
+    // contador e enfeite, mas sessao vencida nao se ignora
+    if (sessaoExpirada(e)) sessaoCaiu();
+  }
 }
 
 let renderToken = 0;
@@ -87,7 +101,11 @@ export async function render() {
   const token = ++renderToken;
   const path = currentPath();
 
-  if (!S.user) return mount(app, loginView(onAuthed));
+  if (!S.user) {
+    const aviso = avisoLogin;
+    avisoLogin = null;                  // some depois de aparecer uma vez
+    return mount(app, loginView(onAuthed, aviso));
+  }
   if (S.user.user_metadata?.must_change_password) {
     return mount(app, changePasswordView(async () => {
       const { data } = await sb.auth.getUser();
@@ -116,6 +134,7 @@ export async function render() {
     mount(body, node);
   } catch (e) {
     if (token !== renderToken) return;
+    if (sessaoExpirada(e)) return sessaoCaiu();
     mount(body, errorBox(e?.message || "Nao consegui carregar esta tela."));
   }
   ajustaTopo();
@@ -144,16 +163,29 @@ async function onAuthed() {
 
 window.addEventListener("hashchange", render);
 
-sb.auth.onAuthStateChange((event) => {
+sb.auth.onAuthStateChange((event, session) => {
+  // o proprio cliente avisa quando nao consegue renovar a sessao
+  if (event === "SIGNED_OUT" && S.user) { sessaoCaiu(); return; }
   if (event === "SIGNED_OUT") { S.user = null; render(); }
+  if (event === "TOKEN_REFRESHED" && session?.user) S.user = session.user;
 });
 
 (async function start() {
+  // havia sessao guardada? se havia e nao serviu, a pessoa merece saber porque
+  const tinhaSessao = Object.keys(localStorage).some((k) => k.includes("escala-uti-auth"));
   try {
-    await boot();
+    const entrou = await boot();
+    if (!entrou && tinhaSessao) {
+      avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+    }
   } catch (e) {
-    mount(app, errorBox("Nao consegui falar com o servidor. " + (e?.message || "")));
-    return;
+    if (sessaoExpirada(e)) {
+      avisoLogin = "Sua sessao expirou por seguranca. Entre de novo para continuar.";
+      S.user = null;
+    } else {
+      mount(app, errorBox("Nao consegui falar com o servidor. " + (e?.message || "")));
+      return;
+    }
   }
   render();
   registerServiceWorker();

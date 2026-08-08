@@ -2,7 +2,7 @@
 // Escala, trocas e fotos NUNCA sao guardadas aqui: sao dados de pessoas
 // e precisam estar sempre atualizados.
 
-const VERSION = "v14";
+const VERSION = "v16";
 const CACHE = `escala-uti-${VERSION}`;
 
 const SHELL = [
@@ -28,6 +28,43 @@ self.addEventListener("activate", (e) => {
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()));
+});
+
+// -------------------------------------------------------------
+// Notificacao push
+// -------------------------------------------------------------
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { title: "Escala UTI" }; }
+
+  e.waitUntil(self.registration.showNotification(d.title || "Escala UTI", {
+    body: d.body || "",
+    icon: "./assets/icon-192.png",
+    badge: "./assets/icon-192.png",
+    // mesma tag substitui o aviso anterior do mesmo tipo, em vez de empilhar
+    tag: d.tag || "escala",
+    renotify: true,
+    data: { url: d.url || "./" },
+    // vibra: no bolso do jaleco a tela nao e vista
+    vibrate: [90, 50, 90],
+  }));
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const alvo = e.notification.data?.url || "./";
+  e.waitUntil((async () => {
+    const abas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const c of abas) {
+      if (c.url.includes("/escala-uti")) {
+        await c.focus();
+        // leva a aba que ja esta aberta para a tela do aviso
+        if ("navigate" in c) { try { await c.navigate(alvo); } catch { /* ignora */ } }
+        return;
+      }
+    }
+    await self.clients.openWindow(alvo);
+  })());
 });
 
 // Codigo (HTML, CSS, JS) busca a rede primeiro. Assim uma correcao chega

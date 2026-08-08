@@ -60,6 +60,9 @@ async function paint(root) {
         },
       }, "Salvar"))),
 
+    h("div", { class: "bar", style: { marginTop: "16px" } }, h("span", null, "Aviso no celular")),
+    blocoPush(),
+
     h("div", { class: "bar", style: { marginTop: "16px" } },
       h("span", null, "Avisos"),
       notes.some((n) => !n.read_at) && h("button", {
@@ -81,6 +84,71 @@ async function paint(root) {
       h("p", { class: "meta", style: { textAlign: "center", marginTop: "16px", lineHeight: "1.6" } },
         "Para instalar no celular: abra no navegador, toque em compartilhar e escolha ",
         h("span", { class: "strong" }, "Adicionar a Tela de Inicio"), ".")));
+}
+
+/**
+ * Liga o aviso no aparelho. Precisa vir de um toque da pessoa: navegador
+ * nenhum concede permissao de notificacao sem gesto.
+ */
+function blocoPush() {
+  const caixa = h("div", { class: "card" });
+
+  const pintar = async () => {
+    const { suportaPush, precisaInstalar, permissao, inscricaoAtual,
+            ativarPush, desativarPush, meusAparelhos } = await import("../lib/push.js");
+
+    if (!suportaPush()) {
+      return mount(caixa, h("div", { class: "card-b meta" },
+        "Este navegador nao recebe aviso. Abra o app no Safari do iPhone ou no Chrome."));
+    }
+    if (precisaInstalar()) {
+      return mount(caixa, h("div", { class: "card-b" },
+        h("div", { class: "strong", style: { fontSize: "13.5px" } },
+          "Instale o app antes de ligar o aviso"),
+        h("div", { class: "meta", style: { marginTop: "4px", lineHeight: "1.5" } },
+          "No iPhone, o aviso so funciona com o app na tela de inicio. ",
+          "Toque em compartilhar no Safari e escolha Adicionar a Tela de Inicio.")));
+    }
+
+    const sub = await inscricaoAtual();
+    const aparelhos = sub ? await meusAparelhos() : [];
+    const bloqueado = permissao() === "denied";
+
+    mount(caixa, h("div", { class: "card-b" },
+      h("div", { class: "card-row", style: { gap: "10px" } },
+        icon("bell", "grow-0"),
+        h("div", { class: "grow" },
+          h("div", { class: "strong", style: { fontSize: "13.5px" } },
+            sub ? "Aviso ligado neste aparelho" : "Aviso desligado"),
+          h("div", { class: "meta", style: { lineHeight: "1.5" } },
+            sub
+              ? "Voce recebe aviso de troca, cessao e plantao vago mesmo com o app fechado."
+              : bloqueado
+                ? "Voce bloqueou o aviso para este site. Libere nos ajustes do navegador."
+                : "Ligue para saber de troca e cessao sem precisar abrir o app.")),
+        h("button", {
+          class: sub ? "btn btn-sm" : "btn btn-sm btn-primary",
+          disabled: bloqueado && !sub,
+          onclick: async (e) => {
+            e.target.disabled = true;
+            if (sub) {
+              await desativarPush();
+              toast("Aviso desligado neste aparelho.");
+            } else {
+              const r = await ativarPush();
+              toast(r.ok ? "Aviso ligado." : r.motivo);
+            }
+            pintar();
+          },
+        }, sub ? "Desligar" : "Ligar")),
+
+      aparelhos.length > 1 && h("div", { class: "meta", style: { marginTop: "10px" } },
+        `Ligado em ${aparelhos.length} aparelhos: `,
+        aparelhos.map((a) => a.aparelho || "aparelho").join(", "))));
+  };
+
+  pintar();
+  return caixa;
 }
 
 const noteRow = (n) => h("div", { class: "arow", style: { opacity: n.read_at ? ".55" : "1" } },

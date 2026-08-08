@@ -564,6 +564,16 @@ table.escala .sat { background: var(--paper-3); }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
+/* ---------------- historico ---------------- */
+.hrow {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 13px; border-bottom: 1px solid var(--rule-2);
+}
+.hrow-t { font-size: 13.5px; line-height: 1.4; margin-bottom: 2px; }
+.hrow-ic { flex: none; color: var(--ink-3); padding-top: 2px; }
+.hrow-ic svg { width: 17px; height: 17px; }
+.hrow .chip { flex: none; }
+
 /* ---------------- relatorio do mes ---------------- */
 .print-area { padding: 16px 12px 40px; }
 .rel-cab { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }

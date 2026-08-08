@@ -6,10 +6,12 @@ import { DOW3, br } from "../lib/dates.js";
 import { rotationTab } from "./admin/rotation.js";
 import { vagosTab } from "./admin/vagos.js";
 import { exportTab } from "./admin/export.js";
+import { historicoTab } from "./admin/historico.js";
 
 const TABS = [
   { id: "escala",    label: "Escala fixa", render: rotationTab },
   { id: "vagos",     label: "Vagos",       render: vagosTab },
+  { id: "historico", label: "Historico",   render: historicoTab },
   { id: "fechar",    label: "Fechamento",  render: exportTab },
   { id: "medicos",   label: "Medicos",     render: membersTab },
   { id: "diaristas", label: "Diaristas",   render: roundsTab },

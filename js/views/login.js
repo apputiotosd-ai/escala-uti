@@ -12,8 +12,9 @@ const mark = () => [
              alt: "", "aria-hidden": "true", width: 560, height: 238 }),
 ];
 
-export function loginView(onDone) {
-  const err = h("div");
+export function loginView(onDone, aviso = null) {
+  const err = h("div",
+    aviso && h("div", { class: "err", style: { margin: "0 0 12px" }, role: "status" }, aviso));
   const email = h("input", { class: "inp", type: "email", autocomplete: "username",
                              inputmode: "email", required: true, placeholder: "seu@email.com" });
   const pass = h("input", { class: "inp", type: "password", autocomplete: "current-password",

@@ -43,8 +43,20 @@ export function avatarUrl(path) {
   return path ? `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}` : null;
 }
 
+/**
+ * A sessao venceu ou foi invalidada.
+ * O banco responde com erro tecnico de JWT, que nao serve para ninguem:
+ * quem chama isso manda o medico de volta ao login com uma frase clara.
+ */
+export function sessaoExpirada(e) {
+  const m = (e?.message || "") + " " + (e?.code || "") + " " + (e?.error_description || "");
+  return /jwt expired|jwt is expired|invalid.*refresh token|refresh_token_not_found|PGRST301|token is expired|bad_jwt/i
+    .test(m) || e?.status === 401;
+}
+
 /** Erros do Postgres chegam com prefixo tecnico. O medico nao precisa ver isso. */
 export function niceError(e) {
+  if (sessaoExpirada(e)) return "Sua sessao expirou. Entre de novo.";
   const m = e?.message || String(e || "Nao deu certo.");
   return m
     .replace(/^.*?(?:violates|duplicate key value violates).*unique.*$/i,
@@ -231,6 +243,45 @@ export async function myShifts(days = 180) {
   return rpcTudo("my_shifts", {
     p_org: S.org.id, p_from: hoje(), p_to: somaDias(hoje(), days),
   });
+}
+
+/* =========================================================
+   HISTORICO
+   ========================================================= */
+
+/** Livro de registro da escala fixa. So a coordenacao le. */
+export async function loadAuditoria({ acao = null, limite = 200 } = {}) {
+  let q = sb.from("audit_log").select("*")
+    .eq("org_id", S.org.id)
+    .order("id", { ascending: false })
+    .limit(limite);
+  if (acao) q = q.eq("acao", acao);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data || [];
+}
+
+/** Movimentacoes de plantao: trocas, cessoes e interesses resolvidos. */
+export async function loadMovimentacoes({ limite = 200 } = {}) {
+  const [ex, itr] = await Promise.all([
+    sb.from("exchanges").select("*").eq("org_id", S.org.id)
+      .order("created_at", { ascending: false }).limit(limite),
+    sb.from("shift_interests").select("*").eq("org_id", S.org.id)
+      .neq("status", "open")
+      .order("created_at", { ascending: false }).limit(limite),
+  ]);
+  if (ex.error) throw ex.error;
+  if (itr.error) throw itr.error;
+  return { trocas: ex.data || [], interesses: itr.data || [] };
+}
+
+/** Versoes da escala fixa, da mais recente para a mais antiga. */
+export async function loadVersoes() {
+  const { data, error } = await sb.from("rotations").select("*")
+    .eq("org_id", S.org.id)
+    .order("effective_from", { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
 
 export async function callAdminUsers(payload) {

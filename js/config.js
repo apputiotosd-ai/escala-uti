@@ -3,6 +3,11 @@
 export const SUPABASE_URL = "https://meyoapxqnbeyrnvhmwtu.supabase.co";
 export const SUPABASE_KEY = "sb_publishable_uhJ4OHDy2VULCJTFtWFLDw_-6rISPEX";
 
+// Chave publica VAPID: identifica este app para o servico de push do
+// navegador. E publica por definicao, a privada fica so no servidor.
+export const VAPID_PUBLIC_KEY =
+  "BGf3Zt-hbVQS-mcOnmqtc3k7aXMRTCM_7Krmg2NU5ePlOH9s4rE3z52DtUJOumbPyURhfWnkPUP79GXKO-QJ2HQ";
+
 export const SHIFTS = ["M", "T", "SN"];
 
 export const SHIFT_INFO = {
