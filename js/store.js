@@ -19,6 +19,22 @@ export const S = {
 
 const ORG_KEY = "escala-uti-org";
 
+const pad = (n) => String(n).padStart(2, "0");
+
+/** Data de hoje no fuso de quem esta usando, e nao em UTC.
+ *  Em Fortaleza, depois das 21h o UTC ja virou o dia seguinte, e isso
+ *  fazia o plantao de hoje sumir das listas. */
+export function hoje() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+export function somaDias(iso, n) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const x = new Date(y, m - 1, d + n);
+  return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
+}
+
 export const isAdmin = () => S.me?.role === "admin";
 export const memberName = (id) => S.byId.get(id)?.full_name || "";
 export const unitName = (id) => S.unitById.get(id)?.name || "";
@@ -90,14 +106,34 @@ export async function loadRefs() {
   if (mine) S.me = { ...S.me, ...mine };
 }
 
+/**
+ * A API corta toda resposta em 1000 linhas. Uma escala de varios meses passa
+ * disso facil, e o corte vinha silencioso: a lista voltava incompleta sem erro.
+ * Aqui a leitura e feita em paginas, sempre na mesma ordem, ate acabar.
+ */
+const PAGINA = 900;
+
+async function rpcTudo(fn, args, ordenar = ["work_date", "shift"]) {
+  const out = [];
+  for (let de = 0; ; de += PAGINA) {
+    let q = sb.rpc(fn, args);
+    for (const col of ordenar) q = q.order(col);
+    const { data, error } = await q.range(de, de + PAGINA - 1);
+    if (error) throw error;
+    out.push(...(data || []));
+    if (!data || data.length < PAGINA) return out;
+    if (de > 100000) return out;          // trava de seguranca
+  }
+}
+
 /** A escala resolvida: escala fixa projetada pelo ciclo + trocas ja aplicadas. */
 export async function loadSchedule(from, to) {
-  const [sch, dr] = await Promise.all([
-    sb.rpc("schedule_range", { p_org: S.org.id, p_from: from, p_to: to }),
+  const [linhas, dr] = await Promise.all([
+    rpcTudo("schedule_range", { p_org: S.org.id, p_from: from, p_to: to }),
     sb.rpc("daily_rounds_range", { p_org: S.org.id, p_from: from, p_to: to }),
   ]);
-  if (sch.error) throw sch.error;
   if (dr.error) throw dr.error;
+  const sch = { data: linhas };
 
   // indice: dia -> unidade -> turno
   const map = new Map();
@@ -122,7 +158,7 @@ export async function loadOffers() {
   const { data, error } = await sb
     .from("offers").select("*")
     .eq("org_id", S.org.id).eq("status", "open")
-    .gte("work_date", new Date().toISOString().slice(0, 10))
+    .gte("work_date", hoje())
     .order("work_date");
   if (error) throw error;
   return data || [];
@@ -148,15 +184,9 @@ export function awaitingMe(list) {
 
 /** Turnos sem plantonista daqui para a frente, com a contagem de interessados. */
 export async function loadVacant(days = 90) {
-  const from = new Date().toISOString().slice(0, 10);
-  const to = new Date(Date.now() + days * 864e5).toISOString().slice(0, 10);
-  const { data, error } = await sb.rpc("vacant_shifts", {
-    p_org: S.org.id, p_from: from, p_to: to,
+  return rpcTudo("vacant_shifts", {
+    p_org: S.org.id, p_from: hoje(), p_to: somaDias(hoje(), days),
   });
-  if (error) throw error;
-  return (data || []).sort((a, b) =>
-    a.work_date.localeCompare(b.work_date) ||
-    ["M", "T", "SN"].indexOf(a.shift) - ["M", "T", "SN"].indexOf(b.shift));
 }
 
 /** Manifestacoes de interesse. Sem filtro, traz as abertas. */
@@ -164,7 +194,7 @@ export async function loadInterests(status = ["open"]) {
   const { data, error } = await sb
     .from("shift_interests").select("*")
     .eq("org_id", S.org.id).in("status", status)
-    .gte("work_date", new Date().toISOString().slice(0, 10))
+    .gte("work_date", hoje())
     .order("created_at");            // ordem de chegada
   if (error) throw error;
   return data || [];
@@ -189,16 +219,15 @@ export async function refreshUnread() {
   return S.unread;
 }
 
-/** Meus plantoes daqui para a frente. */
-export async function myShifts(days = 120) {
-  const from = new Date().toISOString().slice(0, 10);
-  const to = new Date(Date.now() + days * 864e5).toISOString().slice(0, 10);
-  const { data, error } = await sb.rpc("schedule_range", { p_org: S.org.id, p_from: from, p_to: to });
-  if (error) throw error;
-  return (data || [])
-    .filter((r) => r.member_id === S.me.id)
-    .sort((a, b) => a.work_date.localeCompare(b.work_date) ||
-                    ["M", "T", "SN"].indexOf(a.shift) - ["M", "T", "SN"].indexOf(b.shift));
+/**
+ * Meus plantoes daqui para a frente.
+ * Quem filtra e o banco: pedir a escala inteira e peneirar no navegador
+ * batia no corte de 1000 linhas da API e perdia plantao.
+ */
+export async function myShifts(days = 180) {
+  return rpcTudo("my_shifts", {
+    p_org: S.org.id, p_from: hoje(), p_to: somaDias(hoje(), days),
+  });
 }
 
 export async function callAdminUsers(payload) {
