@@ -28,6 +28,8 @@ export const ICONS = {
   dots:    P('<circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/>'),
   install: P('<path d="M12 3.5v10.5"/><path d="M8 10.2 12 14l4-3.8"/><path d="M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>'),
   zoom:    P('<circle cx="10.6" cy="10.6" r="6.4"/><path d="M15.4 15.4 20.5 20.5M8.2 10.6h4.8M10.6 8.2v4.8"/>'),
+  // duas setas em circulo: buscar de novo o que esta no servidor
+  refresh: P('<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.2 3.6v4.6h-4.6"/>'),
   // contorno do balao do WhatsApp com o fone dentro
   whats:   P('<path d="M20.3 11.7a8.3 8.3 0 0 1-12.2 7.3L3.7 20.3l1.3-4.4A8.3 8.3 0 1 1 20.3 11.7z"/><path d="M9.2 8.6c.5-.1.8 0 1 .5l.6 1.3c.1.3.1.5-.1.7l-.4.5c-.2.2-.2.4 0 .7a6 6 0 0 0 2.3 2.1c.3.1.5.1.7-.1l.5-.5c.2-.2.4-.2.7-.1l1.3.6c.4.2.6.5.5.9-.1.9-1 1.5-2 1.4a7.7 7.7 0 0 1-6.2-6c-.1-1 .4-1.9 1.1-2.4z"/>'),
 };

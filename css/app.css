@@ -122,7 +122,11 @@ a { color: inherit; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .top .sub { font-size: 11px; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; }
-.top-actions { margin-left: auto; display: flex; gap: 4px; align-items: center; }
+.top-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+/* Alvo do dedo maior que o desenho: 30px erra muito num celular. Cresce
+   por fora, sem empurrar o cabecalho para baixo. */
+.top-actions .btn-icon { position: relative; }
+.top-actions .btn-icon::after { content: ""; position: absolute; inset: -6px -3px; }
 
 .wrap { max-width: 1100px; margin: 0 auto; }
 
@@ -148,6 +152,15 @@ a { color: inherit; }
 .btn-icon:hover { background: var(--paper-3); }
 .btn-block { width: 100%; justify-content: center; }
 .btn svg { width: 1em; height: 1em; flex: none; }
+
+/* o icone gira enquanto o app busca de novo o que esta no servidor */
+.btn.girando svg { animation: gira .8s linear infinite; }
+.btn.girando { pointer-events: none; color: var(--brand-2); }
+@keyframes gira { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn.girando svg { animation: none; }
+  .btn.girando { opacity: .5; }
+}
 
 /* ---------------- turnos ---------------- */
 .shift {

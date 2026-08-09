@@ -1,7 +1,8 @@
-import { h, mount, clear } from "./lib/dom.js";
+import { h, mount, clear, toast } from "./lib/dom.js";
 import { icon } from "./lib/icons.js";
 import {
   S, sb, boot, isAdmin, refreshUnread, loadExchanges, awaitingMe, setOrg, sessaoExpirada,
+  loadRefs,
 } from "./store.js";
 import { loading, errorBox } from "./lib/ui.js";
 import { ajustaTopo } from "./lib/sticky.js";
@@ -73,10 +74,51 @@ function topBar() {
                   m.organizations.short_name || m.organizations.name)))
           : h("h1", null, S.org.short_name || S.org.name)),
       h("div", { class: "top-actions" },
+        h("button", {
+          class: "btn btn-icon", "aria-label": "Atualizar", title: "Atualizar",
+          onclick: (e) => atualizar(e.currentTarget),
+        }, icon("refresh")),
         isAdmin() && h("a", {
           class: "btn btn-icon", href: "#/admin", "aria-label": "Coordenação",
           title: "Coordenação",
         }, icon("cog")))));
+}
+
+/**
+ * Busca de novo o que esta no servidor.
+ * Num app instalado nao existe o botao de recarregar do navegador, e este
+ * e o unico jeito de o medico forcar a atualizacao. Alem dos dados, pergunta
+ * se saiu versao nova do app: se saiu, a pagina recarrega sozinha logo em
+ * seguida para o codigo novo entrar.
+ */
+let atualizando = false;
+async function atualizar(botao) {
+  if (atualizando) return;
+  atualizando = true;
+  pediuAtualizar = true;
+  botao.classList.add("girando");
+  procuraVersaoNova();
+
+  try {
+    await loadRefs();          // fotos, telefones e quem entrou na equipe
+    await render();            // a tela em si recarrega os proprios dados
+    toast("Atualizado.");
+  } catch (e) {
+    if (sessaoExpirada(e)) { sessaoCaiu(); return; }
+    toast(semRede(e)
+      ? "Sem conexão. Tente de novo quando a internet voltar."
+      : "Não consegui atualizar agora.");
+  } finally {
+    atualizando = false;
+    botao.classList.remove("girando");   // o render ja trocou o botao, mas nao custa
+  }
+}
+
+function procuraVersaoNova() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.getRegistration()
+    .then((reg) => reg?.update())
+    .catch(() => { /* sem versao nova nao e erro que interesse ao medico */ });
 }
 
 function navBar(path) {
@@ -218,8 +260,17 @@ sb.auth.onAuthStateChange((event, session) => {
   renovarAoVoltar(() => { if (S.user) sessaoCaiu(); });
 })();
 
+let pediuAtualizar = false;
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   if (location.protocol === "file:") return;
   navigator.serviceWorker.register(new URL("../sw.js", import.meta.url)).catch(() => {});
+
+  // Versao nova do app assumiu. O codigo desta aba ainda e o antigo, entao so
+  // recarregando ele entra. Recarrega quando foi o medico que pediu para
+  // atualizar: assim a tela nunca some do nada no meio de alguma coisa.
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (pediuAtualizar) location.reload();
+  });
 }
