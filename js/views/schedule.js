@@ -10,7 +10,7 @@ import { SHIFTS, SHIFT_INFO } from "../config.js";
 import { openShiftSheet } from "./shift-sheet.js";
 
 // lembra onde o usuario estava ao voltar para a tela
-const view = { y: null, m: null, unit: "", scrolled: false };
+const view = { y: null, m: null, unit: "" };
 
 export async function scheduleView() {
   const now = new Date();
@@ -21,7 +21,8 @@ export async function scheduleView() {
   return root;
 }
 
-async function paint(root) {
+async function paint(root, rolar = true) {
+  const posicao = scrollY;
   const b = monthBounds(view.y, view.m);
   // carrega a grade inteira do mes, inclusive as bordas que completam as semanas
   const sch = await loadSchedule(b.gridStart, b.gridEnd);
@@ -43,21 +44,54 @@ async function paint(root) {
     dayList(sch, b, single ? [S.unitById.get(view.unit)] : S.units, root),
     single ? monthGrid(sch, b, S.unitById.get(view.unit), root) : null);
 
-  // com "Todas" não éxiste grade de mes: a lista serve nas duas larguras
+  // com "Todas" não existe grade de mes: a lista serve nas duas larguras
   body.querySelector(".daylist").style.display = single ? "" : "block";
 
-  // a lista do mes e longa. Na primeira abertura do mes corrente,
-  // leva a tela direto para hoje em vez de deixar o medico rolando.
-  const now = new Date();
-  if (!view.scrolled && view.y === now.getFullYear() && view.m === now.getMonth()) {
-    view.scrolled = true;
-    requestAnimationFrame(() => {
-      root.querySelector(".day.is-today")?.scrollIntoView({ block: "center" });
-    });
-  }
+  if (rolar) mostraHoje(root);
+  else depoisDoLayout(() => scrollTo(0, posicao));
 }
 
-const reload = (root) => paint(root).catch((e) => mount(root, h("div", { class: "err" }, e.message)));
+/**
+ * Deixa o dia de hoje logo abaixo da faixa fixa.
+ * Vale a cada repintura, e não só na primeira: trocar de UTI redesenha a
+ * lista inteira, e sem isto a rolagem ficava onde estava, apontando para
+ * um dia qualquer do conteúdo novo. Quem confere escala precisa cair
+ * sempre no mesmo lugar.
+ */
+function mostraHoje(root) {
+  const agora = new Date();
+  const noMes = view.y === agora.getFullYear() && view.m === agora.getMonth();
+
+  const rolar = () => {
+    if (!root.isConnected) return;
+    // Lista e grade do mês convivem no documento: o CSS esconde uma das
+    // duas conforme a largura. Rolar até a escondida não move nada, então
+    // vale a que está de fato na tela.
+    // O deslocamento da faixa fixa vem do CSS, em scroll-margin-top.
+    const alvo = (noMes
+      ? [".day.is-today", ".mg-cell.today"]
+      : [".daylist", ".monthgrid"])        // outro mês não tem hoje: começa no dia 1
+      .map((sel) => root.querySelector(sel))
+      .find((el) => el && el.getClientRects().length);
+    alvo?.scrollIntoView({ block: "start", behavior: "auto" });
+  };
+
+  rolar();
+  // Na primeira pintura a tela ainda não está no documento, e a altura da
+  // faixa fixa só é medida depois de encaixada. A segunda passada acerta
+  // as duas coisas.
+  depoisDoLayout(rolar);
+}
+
+/**
+ * Depois de a pintura entrar no documento e as alturas fixas serem medidas.
+ * Não usa requestAnimationFrame de propósito: quando a tela está em segundo
+ * plano o navegador nunca chama o quadro, e a rolagem ficaria por fazer.
+ */
+const depoisDoLayout = (fn) => setTimeout(fn, 0);
+
+const reload = (root, rolar = true) =>
+  paint(root, rolar).catch((e) => mount(root, h("div", { class: "err" }, e.message)));
 
 /** Troca a faixa "Agora" quando o turno vira, sem recarregar a escala toda. */
 let relogio;
@@ -124,7 +158,7 @@ function monthNav(root) {
     h("button", {
       class: "btn btn-sm", style: { marginLeft: "8px", visibility: isNow ? "hidden" : "" },
       onclick: () => {
-        view.y = now.getFullYear(); view.m = now.getMonth(); view.scrolled = false;
+        view.y = now.getFullYear(); view.m = now.getMonth();
         reload(root);
       },
     }, "Hoje"));
@@ -179,7 +213,8 @@ function shiftRow(date, unit, shift, row, root) {
   return h("button", {
     class: `srow${mine ? " mine" : ""}`,
     style: { width: "100%", background: mine ? undefined : "none", border: "0", textAlign: "left" },
-    onclick: () => openShiftSheet({ date, unit, shift, row, onChanged: () => reload(root) }),
+    // mexer num plantão não tira o médico do lugar onde ele estava lendo
+    onclick: () => openShiftSheet({ date, unit, shift, row, onChanged: () => reload(root, false) }),
   },
     h("span", { class: `tick ${shift}` }),
     h("span", { class: "srow-u" }, unit.name.replace("UTI ", "")),
@@ -224,7 +259,7 @@ function monthGrid(sch, b, unit, root) {
         cellEl.append(h("button", {
           class: `mg-s${mine ? " mine" : ""}`,
           style: { border: "0", background: "none", padding: "0", width: "100%", textAlign: "left" },
-          onclick: () => openShiftSheet({ date, unit, shift: s, row, onChanged: () => reload(root) }),
+          onclick: () => openShiftSheet({ date, unit, shift: s, row, onChanged: () => reload(root, false) }),
           title: `${SHIFT_INFO[s].label} ${SHIFT_INFO[s].hours}`,
         },
           shiftBadge(s),

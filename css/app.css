@@ -343,6 +343,17 @@ a { color: inherit; }
   .mg-s .ava { width: 17px; height: 17px; }
 }
 
+
+/* Rolar ate hoje sem enfiar o dia embaixo da faixa fixa.
+   O navegador respeita esta margem no scrollIntoView, entao o calculo do
+   deslocamento fica no CSS e acompanha a altura real do cabecalho. */
+.day.is-today,
+.mg-cell.today,
+.daylist,
+.monthgrid {
+  scroll-margin-top: calc(var(--top-h, 56px) + var(--now-h, 0px) + 46px);
+}
+
 /* ---------------- meus plantoes ---------------- */
 .mine-list { padding-bottom: 24px; }
 .mine-row {
