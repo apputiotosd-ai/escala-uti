@@ -1,7 +1,7 @@
 import { h, mount } from "../lib/dom.js";
 import { icon } from "../lib/icons.js";
 import { S, loadSchedule, cell, isAdmin } from "../store.js";
-import { avatar, personLabel, shiftBadge } from "../lib/ui.js";
+import { avatar, personLabel, shiftBadge, abreCartaoPlantonista } from "../lib/ui.js";
 import {
   today, addDays, dow, DOW, monthBounds, monthLabel,
   currentShift, shortName, isWeekend,
@@ -123,7 +123,14 @@ function nowStrip(sch) {
         return h("div", { class: "now-cell" },
           h("span", { class: "now-u" }, u.name),
           m
-            ? h("span", { class: "now-p" }, avatar(row.member_id),
+            // toque na foto abre nome, foto e telefone de quem esta ali agora
+            ? h("button", {
+                class: "now-p", title: `Falar com ${m.full_name}`,
+                onclick: () => abreCartaoPlantonista(
+                  row.member_id,
+                  `${u.name} · ${SHIFT_INFO[shift].label} ${SHIFT_INFO[shift].hours}`),
+              },
+                avatar(row.member_id),
                 h("span", { class: "now-n" }, shortName(m.full_name, m.display_name)))
             : h("span", { class: "now-empty" }, "sem plantonista"));
       })));

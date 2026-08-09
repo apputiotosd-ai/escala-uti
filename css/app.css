@@ -196,7 +196,8 @@ a { color: inherit; }
   animation: fz .14s ease-out;
 }
 @keyframes fz { from { opacity: 0 } to { opacity: 1 } }
-.fotozoom img {
+/* so a foto ampliada, e nao a do cartao, que tambem mora aqui dentro */
+.fotozoom > img {
   max-width: min(88vw, 460px); max-height: 74vh;
   width: auto; height: auto; border-radius: 4px;
   background: var(--paper-3);
@@ -205,6 +206,41 @@ a { color: inherit; }
 .fotozoom-nome {
   color: #fff; font-size: 14px; font-weight: 600; text-align: center;
   letter-spacing: -.01em; max-width: 88vw;
+}
+
+/* cartao de quem esta de plantao: foto, nome e telefone num toque */
+.cartao {
+  width: min(92vw, 320px); cursor: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  padding: 20px 18px 16px;
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: 10px;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, .55);
+}
+.cartao-foto {
+  width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--rule); background: var(--paper-3); cursor: zoom-in;
+}
+.cartao .ava.xl { width: 104px; height: 104px; font-size: 30px; }
+.cartao-nome {
+  font-size: 16px; font-weight: 650; text-align: center; line-height: 1.25;
+  letter-spacing: -.01em;
+}
+.cartao-onde {
+  font-size: 10.5px; letter-spacing: .06em; color: var(--ink-3);
+  text-transform: uppercase; text-align: center; margin-top: -4px;
+}
+.cartao-whats {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 10px 12px; margin-top: 3px;
+  border: 1px solid var(--ok); border-radius: 8px;
+  color: var(--ok); text-decoration: none; font-weight: 600;
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+.cartao-whats svg { width: 18px; height: 18px; flex: none; }
+.cartao-whats .mono { font-size: 14px; letter-spacing: -.01em; }
+.cartao-sem {
+  font-size: 12.5px; color: var(--ink-3); text-align: center;
+  padding: 8px 0 2px; line-height: 1.35;
 }
 
 /* numero com atalho para o WhatsApp */
@@ -242,8 +278,13 @@ a { color: inherit; }
 .now-cell:last-child { border-right: 0; }
 .now-u { font-family: var(--mono); font-size: 9.5px; font-weight: 700;
          letter-spacing: .08em; color: var(--ink-3); }
+/* e botao: abre o cartao com telefone de quem esta de plantao agora */
 .now-p { display: flex; flex-direction: column; align-items: center; gap: 3px;
-         min-width: 0; width: 100%; }
+         min-width: 0; width: 100%;
+         border: 0; background: none; padding: 0; color: inherit; font: inherit;
+         cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.now-p:active { opacity: .6; }
+.now-p:focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; border-radius: 6px; }
 .now-p .ava { width: 24px; height: 24px; }
 .now-n { font-size: 11.5px; font-weight: 550; line-height: 1.2; overflow: hidden;
          text-overflow: ellipsis; white-space: nowrap; min-width: 0; width: 100%; }

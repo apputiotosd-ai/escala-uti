@@ -28,6 +28,13 @@ function placeholder(m, size, mine) {
 }
 
 /**
+ * Duas camadas podem ficar abertas ao mesmo tempo: o cartão do plantonista
+ * e, por cima dele, a foto ampliada. O Esc fecha só a de cima, senão as
+ * duas somem juntas e o médico perde o cartão sem querer.
+ */
+const noTopo = (caixa) => caixa === [...document.querySelectorAll(".fotozoom")].pop();
+
+/**
  * Amplia a foto por cima da tela, sem mexer no layout de baixo.
  * Fecha tocando em qualquer lugar ou com Esc.
  */
@@ -37,7 +44,7 @@ export function ampliaFoto(memberId) {
   if (!url) return;                     // sem foto nao tem o que ampliar
 
   const fechar = () => { caixa.remove(); document.removeEventListener("keydown", tecla); };
-  const tecla = (e) => { if (e.key === "Escape") fechar(); };
+  const tecla = (e) => { if (e.key === "Escape" && noTopo(caixa)) fechar(); };
 
   const caixa = h("div", {
     class: "fotozoom", role: "dialog", "aria-label": `Foto de ${m.full_name}`,
@@ -45,6 +52,53 @@ export function ampliaFoto(memberId) {
   },
     h("img", { src: url, alt: m.full_name || "" }),
     h("div", { class: "fotozoom-nome" }, m.full_name || ""));
+
+  document.addEventListener("keydown", tecla);
+  document.body.append(caixa);
+}
+
+/**
+ * Cartão do plantonista: foto, nome e o telefone com atalho do WhatsApp.
+ * Serve para quem precisa falar agora com quem está no plantão, sem sair
+ * do app para procurar o número. O texto de baixo diz onde ele está.
+ */
+export function abreCartaoPlantonista(memberId, onde = "") {
+  const m = S.byId.get(memberId);
+  if (!m) return;
+
+  const fechar = () => { caixa.remove(); document.removeEventListener("keydown", tecla); };
+  const tecla = (e) => { if (e.key === "Escape" && noTopo(caixa)) fechar(); };
+
+  const url = avatarUrl(m.avatar_path);
+  const foto = url
+    ? h("img", {
+        class: "cartao-foto", src: url, alt: m.full_name || "",
+        title: "Toque para ampliar",
+        onclick: () => ampliaFoto(memberId),
+        onerror: (e) => e.target.replaceWith(avatar(memberId, "xl")),
+      })
+    : avatar(memberId, "xl");
+
+  const url2 = whatsUrl(m.phone);
+  const contato = url2
+    ? h("a", { class: "cartao-whats", href: url2, target: "_blank", rel: "noopener" },
+        icon("whats"), h("span", { class: "mono" }, telFormatado(m.phone)))
+    : h("div", { class: "cartao-sem" },
+        memberId === S.me?.id
+          ? "Você ainda não salvou um telefone no seu perfil."
+          : "Ainda não salvou um telefone no perfil.");
+
+  const caixa = h("div", {
+    class: "fotozoom", role: "dialog", "aria-modal": "true",
+    "aria-label": `Contato de ${m.full_name}`, onclick: fechar,
+  },
+    h("div", { class: "cartao", onclick: (e) => e.stopPropagation() },
+      foto,
+      h("div", { class: "cartao-nome" }, m.full_name || ""),
+      onde ? h("div", { class: "cartao-onde mono" }, onde) : null,
+      contato,
+      h("button", { class: "btn btn-block", style: { marginTop: "4px" }, onclick: fechar },
+        "Fechar")));
 
   document.addEventListener("keydown", tecla);
   document.body.append(caixa);
