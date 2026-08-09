@@ -5,6 +5,7 @@ import {
 } from "./store.js";
 import { loading, errorBox } from "./lib/ui.js";
 import { ajustaTopo } from "./lib/sticky.js";
+import { guardarSessaoNoAparelho, renovarSessao, renovarAoVoltar, semRede } from "./lib/sessao.js";
 
 import { loginView, changePasswordView } from "./views/login.js";
 import { scheduleView } from "./views/schedule.js";
@@ -45,7 +46,10 @@ let avisoLogin = null;      // frase mostrada no login depois de a sessao cair
 
 /** Sessao caiu: limpa e devolve ao login com uma frase que se entende. */
 async function sessaoCaiu() {
-  avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
+  // Nao e prazo: a sessao nao expira sozinha. Isto acontece quando a
+  // coordenacao tira o acesso, quando a senha muda em outro aparelho, ou
+  // quando o telefone apagou os dados do app.
+  avisoLogin = "Precisamos que você entre de novo neste aparelho.";
   try { await sb.auth.signOut({ scope: "local" }); } catch { /* segue */ }
   S.user = null; S.org = null; S.me = null; S.memberships = [];
   render();
@@ -135,6 +139,10 @@ export async function render() {
   } catch (e) {
     if (token !== renderToken) return;
     if (sessaoExpirada(e)) return sessaoCaiu();
+    if (semRede(e)) {
+      // sem sinal nao derruba a sessao: so avisa e deixa tentar de novo
+      return mount(body, errorBox("Sem conexão. A tela carrega assim que a internet voltar."));
+    }
     mount(body, errorBox(e?.message || "Não consegui carregar esta tela."));
   }
   ajustaTopo();
@@ -173,16 +181,30 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 (async function start() {
-  // havia sessao guardada? se havia e nao serviu, a pessoa merece saber porque
+  // pede ao navegador para nao apagar o login deste app
+  guardarSessaoNoAparelho();
+
   const tinhaSessao = Object.keys(localStorage).some((k) => k.includes("escala-uti-auth"));
   try {
     const entrou = await boot();
     if (!entrou && tinhaSessao) {
-      avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
+      // sem sinal nao e sessao vencida: nao manda ninguem entrar de novo a toa
+      const estado = await renovarSessao();
+      if (estado === "sem-rede") {
+        avisoLogin = "Sem conexão agora. Assim que a internet voltar, é só abrir de novo: " +
+                     "você continua conectado.";
+      } else if (estado === "ok") {
+        await boot();
+      } else {
+        avisoLogin = "Precisamos que você entre de novo neste aparelho.";
+      }
     }
   } catch (e) {
-    if (sessaoExpirada(e)) {
-      avisoLogin = "Sua sessão expirou por segurança. Entre de novo para continuar.";
+    if (semRede(e)) {
+      avisoLogin = "Sem conexão agora. Tente de novo quando a internet voltar.";
+      S.user = null;
+    } else if (sessaoExpirada(e)) {
+      avisoLogin = "Precisamos que você entre de novo neste aparelho.";
       S.user = null;
     } else {
       mount(app, errorBox("Não consegui falar com o servidor. " + (e?.message || "")));
@@ -191,6 +213,9 @@ sb.auth.onAuthStateChange((event, session) => {
   }
   render();
   registerServiceWorker();
+
+  // app na tela de inicio fica dias suspenso: renova ao voltar para a frente
+  renovarAoVoltar(() => { if (S.user) sessaoCaiu(); });
 })();
 
 function registerServiceWorker() {
